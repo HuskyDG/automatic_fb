@@ -17,6 +17,18 @@ import base64
 from io import BytesIO
 import requests
 import pytz
+import threading
+
+# Function to stop the script
+def stop_script():
+    print("1 hour has passed! Exiting the script.")
+    sys.exit(0)
+
+# Set the time limit (1 hour = 3600 seconds)
+time_limit = 3600  # seconds
+
+# Start the timer
+timer = threading.Timer(time_limit, stop_script)
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -82,6 +94,8 @@ try:
     
     find_myname = driver.find_elements(By.CSS_SELECTOR, 'h1[class^="html-h1 "]')
     myname = find_myname[-1].text
+    
+    timer.start()
     
     print(myname)
     

@@ -103,7 +103,7 @@ try:
     max_level_chat = 100
     
     driver.switch_to.window(chat_tab)
-    driver.get("https://www.facebook.com/messages/t/156025504001094")
+    driver.get("https://www.facebook.com/messages/")
     wait_for_load(driver)
     time.sleep(2)
     
@@ -114,8 +114,6 @@ try:
     
     while True:
         try:
-            new_chat_coming = False
-            time.sleep(0.5)
             driver.switch_to.window(friend_tab)
             try:
                 for button in driver.find_elements(By.CSS_SELECTOR, 'div[aria-label="Xác nhận"]'):
@@ -141,6 +139,9 @@ try:
             driver.execute_script(reload_script)
 
             driver.switch_to.window(chat_tab)
+            driver.get("https://www.facebook.com/messages/")
+            wait_for_load(driver)
+            time.sleep(5)
             try:
                 element = driver.find_element(By.CSS_SELECTOR, 'input[class="x1i10hfl x9f619 xggy1nq x1s07b3s x1kdt53j x1a2a7pz x5yr21d x17qophe xg01cxk x10l6tqk x13vifvy xh8yej3"]')
                 element.click()
@@ -163,7 +164,6 @@ try:
                     continue
                 
                 print("Tin nhắn mới")
-                new_chat_coming = True
                 
                 driver.execute_script("arguments[0].click();", chat_btn)
                 time.sleep(2)
@@ -326,8 +326,7 @@ The Messenger conversation with "{who_chatted}" is as follows:
                 
                 if level_chat < max_level_chat:
                     level_chat += 1
-            if new_chat_coming:
-                driver.get("https://www.facebook.com/messages/t/156025504001094")
+            
         except Exception as e:
             print(e)
         

@@ -48,6 +48,9 @@ try:
     # Initialize the driver
     driver = webdriver.Chrome(options=chrome_options)
 
+    tz_params = {'timezoneId': 'Asia/Ho_Chi_Minh'}
+    driver.execute_cdp_cmd('Emulation.setTimezoneOverride', tz_params)
+
     chat_tab = driver.current_window_handle
     
     driver.switch_to.new_window('tab')

@@ -170,11 +170,6 @@ try:
 
                 try:
                     msg_scroller = driver.find_element(By.CSS_SELECTOR, 'div[class="x78zum5 xdt5ytf x1iyjqo2 x6ikm8r x1odjw0f xish69e x16o0dkt"]')
-                except Exception:
-                    msg_scroller = None
-
-                
-                if msg_scroller != None:
                     for _x in range(30):
                         driver.execute_script("""
     var divs = document.querySelectorAll('div.x78zum5.xdt5ytf[data-virtualized="false"]');
@@ -195,6 +190,8 @@ try:
 
                         driver.execute_script("arguments[0].scrollTop = 0;", msg_scroller)
                         time.sleep(0.1)
+                except Exception:
+                    pass
 
                 try:
                     msg_table = driver.find_element(By.CSS_SELECTOR, 'div[class="x1uipg7g xu3j5b3 xol2nv xlauuyb x26u7qi x19p7ews x78zum5 xdt5ytf x1iyjqo2 x6ikm8r x10wlt62"]')

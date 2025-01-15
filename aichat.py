@@ -101,7 +101,6 @@ try:
             new_chat_coming = False
             time.sleep(0.5)
             driver.switch_to.window(friend_tab)
-            """
             try:
                 for button in driver.find_elements(By.CSS_SELECTOR, 'div[aria-label="Xác nhận"]'):
                     print("Chấp nhận kết bạn")
@@ -109,7 +108,22 @@ try:
                     time.sleep(0.5)
             except Exception:
                 pass
+            try:
+                for button in driver.find_elements(By.CSS_SELECTOR, 'div[aria-label="Xóa"]'):
+                    print("Xóa kết bạn")
+                    driver.execute_script("arguments[0].click();", button)
+                    time.sleep(0.5)
+            except Exception:
+                pass
+
+            # Insert JavaScript to reload the page after 5 minutes (300,000 ms)
+            reload_script = """
+            setTimeout(function() {
+                location.reload();
+            }, 300000);  // 5 minutes in milliseconds
             """
+            driver.execute_script(reload_script)
+
             driver.switch_to.window(chat_tab)
             try:
                 element = driver.find_element(By.CSS_SELECTOR, 'input[class="x1i10hfl x9f619 xggy1nq x1s07b3s x1kdt53j x1a2a7pz x5yr21d x17qophe xg01cxk x10l6tqk x13vifvy xh8yej3"]')

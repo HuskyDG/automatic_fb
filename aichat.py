@@ -231,12 +231,25 @@ The Messenger conversation with "{who_chatted}" is as follows:
                         info_msg = name + ": " + msg
                     prompt += "\n" + info_msg
 
-                button = driver.find_element(By.CSS_SELECTOR, 'p[class="xat24cr xdj266r"]')
-                button.send_keys(" ")
-                caption=model.generate_content(prompt).text
-                driver.execute_script("arguments[0].click();", button)
-                time.sleep(2)
-                button.send_keys(remove_non_bmp_characters(caption + "\n"))
+                for _x in range(10):
+                    try:
+                        button = driver.find_element(By.CSS_SELECTOR, 'p[class="xat24cr xdj266r"]')
+                        button.send_keys(" ")
+                        caption=model.generate_content(prompt).text
+                        driver.execute_script("arguments[0].click();", button)
+                        time.sleep(2)
+                        button.send_keys(remove_non_bmp_characters(caption + "\n"))
+                        
+                        print(prompt)
+                        print("AI Trả lời:", caption)
+                        time.sleep(2)
+
+                        break
+                    except Exception as e:
+                        print("Thử lại:", _x + 1)
+                        print(e)
+                        time.sleep(2)
+                        continue
                 
                 print(prompt)
                 print("AI Trả lời:", caption)

@@ -42,7 +42,9 @@ try:
         "profile.default_content_setting_values.notifications": 1  # 1 allows notifications, 2 blocks
     }
     chrome_options.add_experimental_option("prefs", prefs)
-    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless=new")  # Enable advanced headless mode
+    chrome_options.add_argument("--disable-gpu")   # Disable GPU acceleration for compatibility
+    chrome_options.add_argument("window-size=1920,1080")  # Set custom window size
     chrome_options.add_argument("--start-maximized")
 
     # Initialize the driver

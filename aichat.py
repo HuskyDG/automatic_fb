@@ -48,7 +48,13 @@ try:
     # Initialize the driver
     driver = webdriver.Chrome(options=chrome_options)
 
-    first_window = driver.current_window_handle
+    chat_tab = driver.current_window_handle
+    
+    driver.switch_to.new_window('tab')
+    friend_tab = driver.current_window_handle
+    
+    driver.switch_to.window(chat_tab)
+    
     wait = WebDriverWait(driver, 10)
 
     
@@ -75,12 +81,22 @@ try:
     level_chat = 100
     max_level_chat = 100
     
+    driver.switch_to.window(chat_tab)
+    driver.get("https://www.facebook.com/messages/")
+    wait_for_load(driver)
+    time.sleep(2)
+    
+    driver.switch_to.window(friend_tab)
+    driver.get("https://www.facebook.com/friends")
+    wait_for_load(driver)
+    time.sleep(2)
+    
     while True:
         try:
+            new_chat_coming = False
+            time.sleep(0.5)
+            driver.switch_to.window(friend_tab)
             try:
-                driver.get("https://www.facebook.com/friends")
-                wait_for_load(driver)
-                time.sleep(2)
                 for button in driver.find_elements(By.CSS_SELECTOR, 'div[aria-label="Xác nhận"]'):
                     print("Chấp nhận kết bạn")
                     driver.execute_script("arguments[0].click();", button)
@@ -88,9 +104,7 @@ try:
             except Exception:
                 pass
             
-            driver.get("https://www.facebook.com/messages/")
-            wait_for_load(driver)
-            time.sleep(2)
+            driver.switch_to.window(chat_tab)
             try:
                 element = driver.find_element(By.CSS_SELECTOR, 'input[class="x1i10hfl x9f619 xggy1nq x1s07b3s x1kdt53j x1a2a7pz x5yr21d x17qophe xg01cxk x10l6tqk x13vifvy xh8yej3"]')
                 element.click()
@@ -112,6 +126,7 @@ try:
                     continue
                 
                 print("Tin nhắn mới")
+                new_chat_coming = True
                 
                 driver.execute_script("arguments[0].click();", chat_btn)
                 time.sleep(4)
@@ -206,7 +221,7 @@ The Messenger conversation is as follows:
                     print(info_msg)
                     prompt += "\n" + info_msg
 
-                button = driver.find_element(By.CSS_SELECTOR, 'div[class="xzsf02u x1a2a7pz x1n2onr6 x14wi4xw x1iyjqo2 x1gh3ibb xisnujt xeuugli x1odjw0f notranslate"]')
+                button = driver.find_element(By.CSS_SELECTOR, 'p[class="xat24cr xdj266r"]')
                 button.send_keys(" ")
                 caption=model.generate_content(prompt).text
                 driver.execute_script("arguments[0].click();", button)
@@ -217,7 +232,8 @@ The Messenger conversation is as follows:
                 
                 if level_chat < max_level_chat:
                     level_chat += 1
-                    
+            if new_chat_coming:
+                driver.get("https://www.facebook.com/messages/")
         except Exception as e:
             print(e)
         

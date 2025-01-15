@@ -64,11 +64,13 @@ try:
     print("Đang tải dữ liệu từ cookies")
     cache_fb = json.loads(os.getenv("COOKIES"))
         
+    driver.execute_cdp_cmd("Emulation.setScriptExecutionDisabled", {"value": True})
     driver.get("https://www.facebook.com")
     driver.delete_all_cookies()
     for cookie in cache_fb:
         driver.add_cookie(cookie)
     print("Đã khôi phục cookies")
+    driver.execute_cdp_cmd("Emulation.setScriptExecutionDisabled", {"value": False})
     #print("Vui lòng xác nhận đăng nhập, sau đó nhấn Enter ở đây...")
     #input()
     

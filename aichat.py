@@ -99,6 +99,7 @@ try:
             new_chat_coming = False
             time.sleep(0.5)
             driver.switch_to.window(friend_tab)
+            """
             try:
                 for button in driver.find_elements(By.CSS_SELECTOR, 'div[aria-label="Xác nhận"]'):
                     print("Chấp nhận kết bạn")
@@ -106,7 +107,7 @@ try:
                     time.sleep(0.5)
             except Exception:
                 pass
-            
+            """
             driver.switch_to.window(chat_tab)
             try:
                 element = driver.find_element(By.CSS_SELECTOR, 'input[class="x1i10hfl x9f619 xggy1nq x1s07b3s x1kdt53j x1a2a7pz x5yr21d x17qophe xg01cxk x10l6tqk x13vifvy xh8yej3"]')

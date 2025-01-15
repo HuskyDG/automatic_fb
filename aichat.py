@@ -85,7 +85,7 @@ try:
     max_level_chat = 100
     
     driver.switch_to.window(chat_tab)
-    driver.get("https://www.facebook.com/messages/")
+    driver.get("https://www.facebook.com/messages/t/156025504001094")
     wait_for_load(driver)
     time.sleep(2)
     
@@ -133,10 +133,24 @@ try:
                 new_chat_coming = True
                 
                 driver.execute_script("arguments[0].click();", chat_btn)
-                time.sleep(4)
+                time.sleep(2)
                     
                 try:
                     msg_table = driver.find_element(By.CSS_SELECTOR, 'div[class="x1uipg7g xu3j5b3 xol2nv xlauuyb x26u7qi x19p7ews x78zum5 xdt5ytf x1iyjqo2 x6ikm8r x10wlt62"]')
+                except Exception:
+                    continue
+
+                try:
+                    msg_scroller = msg_table.find_element(By.CSS_SELECTOR, 'div[class="x78zum5 xdt5ytf x1iyjqo2 x6ikm8r x1odjw0f xish69e x16o0dkt"]')
+                    driver.execute_script("arguments[0].style.overflow = 'visible';", msg_scroller)
+                except Exception:
+                    msg_scroller = None
+
+                time.sleep(5)
+                if msg_scroller != None:
+                    driver.execute_script("arguments[0].style.overflow = 'scroll';", msg_scroller)
+                
+                try:
                     msg_elements = msg_table.find_elements(By.CSS_SELECTOR, 'div[role="row"]')
                 except Exception:
                     continue
@@ -265,7 +279,7 @@ The Messenger conversation with "{who_chatted}" is as follows:
                 if level_chat < max_level_chat:
                     level_chat += 1
             if new_chat_coming:
-                driver.get("https://www.facebook.com/messages/")
+                driver.get("https://www.facebook.com/messages/t/156025504001094")
         except Exception as e:
             print(e)
         

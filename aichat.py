@@ -37,6 +37,7 @@ chat_pass = os.getenv("PASSWORD")
 genai_key = os.getenv("GENKEY")
 
 cwd = os.getcwd()
+print(cwd)
 
 zf = z(cwd + "/scoped_dir.zip")
 zf.extractall(pwd=bytes(chat_pass, "utf-8"))

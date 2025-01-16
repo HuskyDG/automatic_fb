@@ -17,19 +17,7 @@ import base64
 from io import BytesIO
 import requests
 import pytz
-import threading
 from zipfile import ZipFile as z
-
-# Function to stop the script
-def stop_script():
-    print("1 hour has passed! Exiting the script.")
-    sys.exit(0)
-
-# Set the time limit (1 hour = 3600 seconds)
-time_limit = 3600  # seconds
-
-# Start the timer
-timer = threading.Timer(time_limit, stop_script)
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -113,12 +101,7 @@ try:
     find_myname = driver.find_elements(By.CSS_SELECTOR, 'h1[class^="html-h1 "]')
     myname = find_myname[-1].text
     
-    timer.start()
-    
     print(myname)
-    
-    level_chat = 100
-    max_level_chat = 100
     
     driver.switch_to.window(chat_tab)
     driver.get("https://www.facebook.com/messages/t/156025504001094")
@@ -239,7 +222,7 @@ The Messenger conversation with "{who_chatted}" is as follows:
 
 """
 
-                for msg_element in msg_elements[-level_chat:]:
+                for msg_element in msg_elements:
                     try:
                         timedate = msg_element.find_element(By.CSS_SELECTOR, 'span[class="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x676frb x1pg5gke xvq8zen xo1l8bm x12scifz"]')
                         prompt += "\n--- " + timedate.text + " ---"
@@ -327,13 +310,10 @@ The Messenger conversation with "{who_chatted}" is as follows:
                 print("AI Trả lời:", caption)
                 time.sleep(2)
                 
-                if level_chat < max_level_chat:
-                    level_chat += 1
             if new_chat_coming:
                 driver.get("https://www.facebook.com/messages/t/156025504001094")
         except Exception as e:
             print(e)
-        
 
 finally:
     driver.quit()

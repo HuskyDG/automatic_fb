@@ -38,7 +38,7 @@ jobs:
 
       # Run the script
       - name: Run script
-        run: python aichat.py
+        run: python aichat_timeout.py
         env:
           PYTHONUNBUFFERED: "1"
           COOKIES: ${{ secrets.MYCOOKIES }}

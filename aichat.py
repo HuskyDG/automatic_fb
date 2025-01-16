@@ -18,6 +18,7 @@ from io import BytesIO
 import requests
 import pytz
 import threading
+from zipfile import ZipFile as z
 
 # Function to stop the script
 def stop_script():
@@ -34,6 +35,11 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 chat_pass = os.getenv("PASSWORD")
 genai_key = os.getenv("GENKEY")
+
+cwd = os.getcwd()
+
+zf = z(cwd + "/scoped_dir.zip")
+zf.extractall(pwd=bytes(chat_pass, "utf-8"))
 
 genai.configure(api_key=genai_key)
 model = genai.GenerativeModel('gemini-1.5-flash')
@@ -58,6 +64,7 @@ try:
     chrome_options.add_argument("--disable-gpu")   # Disable GPU acceleration for compatibility
     chrome_options.add_argument("window-size=1920,1080")  # Set custom window size
     chrome_options.add_argument("--start-maximized")
+    chrome_options.add_argument(f"--user-data-dir={cwd}/scoped_dir")
 
     # Initialize the driver
     driver = webdriver.Chrome(options=chrome_options)
@@ -73,20 +80,6 @@ try:
     driver.switch_to.window(chat_tab)
     
     wait = WebDriverWait(driver, 10)
-
-    
-    print("Đang tải dữ liệu từ cookies")
-    cache_fb = json.loads(os.getenv("COOKIES"))
-        
-    driver.execute_cdp_cmd("Emulation.setScriptExecutionDisabled", {"value": True})
-    driver.get("https://www.facebook.com")
-    driver.delete_all_cookies()
-    for cookie in cache_fb:
-        driver.add_cookie(cookie)
-    print("Đã khôi phục cookies")
-    driver.execute_cdp_cmd("Emulation.setScriptExecutionDisabled", {"value": False})
-    #print("Vui lòng xác nhận đăng nhập, sau đó nhấn Enter ở đây...")
-    #input()
     
     
     driver.get("https://www.facebook.com/profile.php")
@@ -142,16 +135,6 @@ try:
             driver.get("https://www.facebook.com/messages/")
             wait_for_load(driver)
             time.sleep(5)
-            try:
-                element = driver.find_element(By.CSS_SELECTOR, 'input[class="x1i10hfl x9f619 xggy1nq x1s07b3s x1kdt53j x1a2a7pz x5yr21d x17qophe xg01cxk x10l6tqk x13vifvy xh8yej3"]')
-                element.click()
-                time.sleep(2)
-                for digit in chat_pass:
-                    element.send_keys(digit)  # Send the digit to the input element
-                    time.sleep(0.5)  # Wait for 0.5 seconds before sending the next digit
-                time.sleep(10)
-            except Exception:
-                pass
             
             # find all unread single chats not group (span[class="x6s0dn4 xzolkzo x12go9s9 x1rnf11y xprq8jg x9f619 x3nfvp2 xl56j7k x1spa7qu x1kpxq89 xsmyaan"])
             chat_btns = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"]')

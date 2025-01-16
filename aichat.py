@@ -52,6 +52,18 @@ def wait_for_load(driver):
 
 def remove_non_bmp_characters(input_string):
     return ''.join(c for c in input_string if ord(c) <= 0xFFFF)
+    
+def inject_reload(driver):
+    # Insert JavaScript to reload the page after 5 minutes (300,000 ms)
+    reload_script = """
+            if (typeof window.reloadScheduled === 'undefined') {
+                window.reloadScheduled = true;
+                setTimeout(function() {
+                    location.reload();
+                }, 300000);  // 5 minutes in milliseconds
+            }
+    """
+    driver.execute_script(reload_script)
 
 try:
     # Set Chrome options
@@ -109,7 +121,7 @@ try:
     max_level_chat = 100
     
     driver.switch_to.window(chat_tab)
-    driver.get("https://www.facebook.com/messages/")
+    driver.get("https://www.facebook.com/messages/t/156025504001094")
     wait_for_load(driver)
     time.sleep(2)
     
@@ -120,7 +132,11 @@ try:
     
     while True:
         try:
+            new_chat_coming = False
+            time.sleep(0.5)
             driver.switch_to.window(friend_tab)
+            inject_reload(driver)
+
             try:
                 for button in driver.find_elements(By.CSS_SELECTOR, 'div[aria-label="Xác nhận"]'):
                     print("Chấp nhận kết bạn")
@@ -136,18 +152,8 @@ try:
             except Exception:
                 pass
 
-            # Insert JavaScript to reload the page after 5 minutes (300,000 ms)
-            reload_script = """
-            setTimeout(function() {
-                location.reload();
-            }, 300000);  // 5 minutes in milliseconds
-            """
-            driver.execute_script(reload_script)
-
             driver.switch_to.window(chat_tab)
-            driver.get("https://www.facebook.com/messages/")
-            wait_for_load(driver)
-            time.sleep(5)
+            inject_reload(driver)
             
             # find all unread single chats not group (span[class="x6s0dn4 xzolkzo x12go9s9 x1rnf11y xprq8jg x9f619 x3nfvp2 xl56j7k x1spa7qu x1kpxq89 xsmyaan"])
             chat_btns = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"]')
@@ -160,6 +166,7 @@ try:
                     continue
                 
                 print("Tin nhắn mới")
+                new_chat_coming = True
                 
                 driver.execute_script("arguments[0].click();", chat_btn)
                 time.sleep(2)
@@ -322,7 +329,8 @@ The Messenger conversation with "{who_chatted}" is as follows:
                 
                 if level_chat < max_level_chat:
                     level_chat += 1
-            
+            if new_chat_coming:
+                driver.get("https://www.facebook.com/messages/t/156025504001094")
         except Exception as e:
             print(e)
         

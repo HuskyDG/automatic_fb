@@ -2,13 +2,13 @@ name: Run test_cookies.py
 
 on:
   schedule:
-    - cron: "*/60 * * * *"
+    - cron: "0 17 * * *"  # Runs every day
   workflow_dispatch:
 
 jobs:
   run-tests:
     runs-on: windows-latest
-    timeout-minutes: 70
+    timeout-minutes: 1450
 
     steps:
       # Checkout the repository

@@ -33,6 +33,6 @@ def run_with_timeout(cmd, timeout_sec):
 
 # Example usage:
 command = "python aichat.py"
-timeout_seconds = 3600  # Adjust timeout as needed
+timeout_seconds = 86400  # Adjust timeout as needed
 
 run_with_timeout(command, timeout_seconds)

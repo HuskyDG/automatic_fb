@@ -311,10 +311,6 @@ The Messenger conversation with "{who_chatted}" is as follows:
                         time.sleep(2)
                         continue
                 
-                print(prompt)
-                print("AI Trả lời:", caption)
-                time.sleep(2)
-                
             if new_chat_coming:
                 driver.get("https://www.facebook.com/messages/t/156025504001094")
         except Exception as e:

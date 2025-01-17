@@ -2,13 +2,13 @@ name: Run test_cookies.py
 
 on:
   schedule:
-    - cron: "0 17 * * *"  # Runs every day
+    - cron: "0 */5 * * *"
   workflow_dispatch:
 
 jobs:
   run-tests:
     runs-on: windows-latest
-    timeout-minutes: 1450
+    timeout-minutes: 310
 
     steps:
       # Checkout the repository
@@ -36,10 +36,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install pillow selenium google-generativeai webdriver-manager pytz
 
-      - name: Cancel previous workflows
-        uses: styfle/cancel-workflow-action@v0.11.0
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
-          access_token: ${{ secrets.GITHUB_TOKEN }}
+          access_token: ${{ github.token }}
 
       # Run the script
       - name: Run script
@@ -51,8 +51,3 @@ jobs:
           COOKIES: ${{ secrets.MYCOOKIES }}
           GENKEY: ${{ secrets.GENKEY }}
           PASSWORD: ${{ secrets.PASSWORD }}
-
-      # Final step to force success
-      - name: Mark workflow as successful
-        if: always()
-        run: echo "Workflow timed out or failed, marking as success."

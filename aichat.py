@@ -282,7 +282,7 @@ The Messenger conversation with "{who_chatted}" is as follows:
                     # Finding name
                     try: 
                         msg_element.find_element(By.CSS_SELECTOR, 'div[class="html-div xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp x11i5rnm x12nagc x1mh8g0r x1yc453h x126k92a xyk4ms5"]').text
-                        name = "Tin nhắn của bạn"
+                        name = "- Tin nhắn của bạn"
                     except Exception:
                         name = None
 
@@ -363,6 +363,7 @@ The Messenger conversation with "{who_chatted}" is as follows:
                     except Exception:
                         pass
 
+                prompt += "\n\n>> TYPE YOUR MESSAGE TO REPLY"
                 for _x in range(10):
                     try:
                         button = driver.find_element(By.CSS_SELECTOR, 'p[class="xat24cr xdj266r"]')

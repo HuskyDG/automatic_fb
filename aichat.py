@@ -115,6 +115,14 @@ try:
     
     while True:
         try:
+            with open("exitnow.txt", "r") as file:
+                content = file.read().strip()  # Read and strip any whitespace/newline
+                if content == "1":
+                    break
+        except Exception:
+            pass # Ignore all errors
+
+        try:
             new_chat_coming = False
             time.sleep(0.5)
             driver.switch_to.window(friend_tab)

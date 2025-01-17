@@ -9,10 +9,23 @@ def run_with_timeout(cmd, timeout_sec):
         # Wait for the process to complete or timeout
         proc.communicate(timeout=timeout_sec)
     except subprocess.TimeoutExpired:
-        # Timeout occurred. Terminate the process group
+        # Timeout occurred. Notify and write to exitnow.txt
         print(f"Process timed out after {timeout_sec} seconds. Terminating...")
-        proc.terminate()  # Sends SIGTERM to the process
-        proc.communicate()  # Ensure the process exits cleanly
+        try:
+            with open("exitnow.txt", "w") as file:
+                file.write("1")  # Tell aichat.py to stop by itself
+        except Exception:
+            pass
+
+        # Wait for up to 10 minutes for the process to stop
+        try:
+            print("Waiting for the process to terminate gracefully...")
+            proc.communicate(timeout=600)  # Wait up to 10 minutes
+            print("Process terminated gracefully within 10 minutes.")
+        except subprocess.TimeoutExpired:
+            print("Process did not terminate within 10 minutes. Forcefully killing it.")
+            proc.terminate()  # Sends SIGTERM to the process
+            proc.communicate()  # Ensure the process exits cleanly
     except Exception as e:
         print(f"An error occurred: {e}")
         proc.terminate()

@@ -33,6 +33,43 @@ zf.extractall(pwd=bytes(chat_pass, "utf-8"))
 genai.configure(api_key=genai_key)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
+emoji_to_shortcut = [
+    {"emoji": "👍", "shortcut": "(y)"},
+    {"emoji": "😇", "shortcut": "O:)"},
+    {"emoji": "😈", "shortcut": "3:)"},
+    {"emoji": "❤️", "shortcut": "<3"},
+    {"emoji": "😞", "shortcut": ":("},
+    {"emoji": "☹️", "shortcut": ":["},
+    {"emoji": "😊", "shortcut": "^_^"},
+    {"emoji": "😕", "shortcut": "o.O"},
+    {"emoji": "😲", "shortcut": ":O"},
+    {"emoji": "😘", "shortcut": ":*"},
+    {"emoji": "😢", "shortcut": ":'("},
+    {"emoji": "😎", "shortcut": "8-)"},
+    {"emoji": "😆", "shortcut": ":v"},
+    {"emoji": "😸", "shortcut": ":3"},
+    {"emoji": "😁", "shortcut": ":-D"},
+    {"emoji": "🐧", "shortcut": "<(\")"},
+    {"emoji": "😠", "shortcut": ">:("},
+    {"emoji": "😜", "shortcut": ":P"},
+    {"emoji": "😮", "shortcut": ">:O"},
+    {"emoji": "😕", "shortcut": ":/"},
+    {"emoji": "🤖", "shortcut": ":|]"},
+    {"emoji": "🦈", "shortcut": "(^^^)"},
+    {"emoji": "😑", "shortcut": "-_-"},
+    {"emoji": "💩", "shortcut": ":poop:"},
+    {"emoji": "😭", "shortcut": "T_T"},
+]
+
+# Create a dictionary for quick lookup
+emoji_dict = {item["emoji"]: item["shortcut"] for item in emoji_to_shortcut}
+
+def replace_emoji_with_shortcut(text):
+    # Use regex to find all emojis and replace them
+    for emoji, shortcut in emoji_dict.items():
+        text = text.replace(emoji, shortcut)
+    return text
+
 def wait_for_load(driver):
     WebDriverWait(driver, 10).until(
         lambda d: d.execute_script("return document.readyState") == "complete"
@@ -333,7 +370,7 @@ The Messenger conversation with "{who_chatted}" is as follows:
                         caption=model.generate_content(prompt).text
                         driver.execute_script("arguments[0].click();", button)
                         time.sleep(2)
-                        button.send_keys(remove_non_bmp_characters(caption + "\n"))
+                        button.send_keys(remove_non_bmp_characters(replace_emoji_with_shortcut(caption) + "\n"))
                         
                         print(prompt)
                         print("AI Trả lời:", caption)

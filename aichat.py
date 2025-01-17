@@ -282,7 +282,24 @@ The Messenger conversation with "{who_chatted}" is as follows:
                         msg = f"<Đã gửi 1 bức ảnh: {img_detail.text}>"
                     except Exception:
                         pass
-                    
+
+                    try: 
+                        react_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[height="32"][width="32"]')
+                        emojis = ""
+                        if msg == None and len(react_elements) > 0:
+                            for react_element in react_elements:
+                                emojis += react_element.get_attribute("alt")
+                            msg = emojis
+                    except Exception:
+                        pass
+
+                    if msg == None:
+                        try:
+                            msg_element.find_element(By.CSS_SELECTOR, 'div[aria-label="Like, thumbs up"]')
+                            msg = "👍"
+                        except Exception:
+                            msg = None
+
                     if msg == None:
                         continue
                     if name == None:
@@ -290,6 +307,16 @@ The Messenger conversation with "{who_chatted}" is as follows:
                     else:
                         info_msg = name + ": " + msg
                     prompt += "\n" + info_msg
+
+                    try: 
+                        react_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[height="16"][width="16"]')
+                        emojis = ""
+                        if len(react_elements) > 0:
+                            for react_element in react_elements:
+                                emojis += react_element.get_attribute("alt")
+                            prompt += f"\n<Tin nhắn trên được thả cảm xúc với các emoji sau: {emojis}>"
+                    except Exception:
+                        pass
 
                 for _x in range(10):
                     try:

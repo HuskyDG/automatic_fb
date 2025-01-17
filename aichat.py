@@ -33,6 +33,19 @@ zf.extractall(pwd=bytes(chat_pass, "utf-8"))
 genai.configure(api_key=genai_key)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
+def escape_string(input_string):
+    """
+    Escapes special characters in a string, including replacing newlines with \\n.
+    :param input_string: The string to be escaped.
+    :return: The escaped string.
+    """
+    escaped_string = input_string.replace("\\", "\\\\")  # Escape backslashes
+    escaped_string = escaped_string.replace("\n", "\\n")  # Escape newlines
+    escaped_string = escaped_string.replace("\t", "\\t")  # Escape tabs (optional)
+    escaped_string = escaped_string.replace("\"", "\\\"")  # Escape double quotes
+    escaped_string = escaped_string.replace("\'", "\\\'")  # Escape single quotes
+    return escaped_string
+
 emoji_to_shortcut = [
     {"emoji": "👍", "shortcut": "(y)"},
     {"emoji": "😇", "shortcut": "O:)"},
@@ -267,32 +280,32 @@ Note:
 - To make the conversation less boring, you can ask the other person some interesting questions.
 - IMPORTANT! The content you create for me is the content of the reply message.
 
-The Messenger conversation with "{who_chatted}" is as follows:
+The Messenger conversation with "{who_chatted}" is as json here:
 
-"""
+["""
 
                 for msg_element in msg_elements:
                     try:
                         timedate = msg_element.find_element(By.CSS_SELECTOR, 'span[class="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x676frb x1pg5gke xvq8zen xo1l8bm x12scifz"]')
-                        prompt += "\n--- " + timedate.text + " ---"
+                        prompt += "\n{\"conversation_event\" : \"" + timedate.text + "\"},"
                     except Exception:
                         pass
                         
                     # Finding name
                     try: 
                         msg_element.find_element(By.CSS_SELECTOR, 'div[class="html-div xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp x11i5rnm x12nagc x1mh8g0r x1yc453h x126k92a xyk4ms5"]').text
-                        name = "- Tin nhắn của bạn"
+                        name = "Tin nhắn của bạn"
                     except Exception:
                         name = None
 
                     if name == None:
                         try: 
-                            name = "- " + msg_element.find_element(By.CSS_SELECTOR, 'h4').text
+                            name = msg_element.find_element(By.CSS_SELECTOR, 'h4').text
                         except Exception:
                             name = None
                     if name == None:
                         try: 
-                            name = "- " + msg_element.find_element(By.CSS_SELECTOR, 'span[class="html-span xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1hl2dhg x16tdsg8 x1vvkbs xzpqnlu x1hyvwdk xjm9jq1 x6ikm8r x10wlt62 x10l6tqk x1i1rx1s"]').text
+                            name = msg_element.find_element(By.CSS_SELECTOR, 'span[class="html-span xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1hl2dhg x16tdsg8 x1vvkbs xzpqnlu x1hyvwdk xjm9jq1 x6ikm8r x10wlt62 x10l6tqk x1i1rx1s"]').text
                         except Exception:
                             name = None
                     
@@ -347,10 +360,8 @@ The Messenger conversation with "{who_chatted}" is as follows:
                     if msg == None:
                         continue
                     if name == None:
-                        info_msg = "  " + msg
-                    else:
-                        info_msg = name + ": " + msg
-                    prompt += "\n" + info_msg
+                        name = "None"
+                    prompt += "\n{\"conversation_message\": {\"" + escape_string(name) + "\" : \"" + escape_string(msg) + "\"}},"
 
                     try: 
                         react_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[height="16"][width="16"]')
@@ -358,11 +369,15 @@ The Messenger conversation with "{who_chatted}" is as follows:
                         if len(react_elements) > 0:
                             for react_element in react_elements:
                                 emojis += react_element.get_attribute("alt")
-                            prompt += f"\n<Tin nhắn trên được thả cảm xúc với các emoji sau: {emojis}>"
+                            emoji_info = f"Tin nhắn trên được thả cảm xúc với các emoji sau: {emojis}"
+                            
+                            prompt += "\n{\"conversation_event\" : \"" + escape_string(emoji_info) + "\"},"
+                            
                     except Exception:
                         pass
 
-                prompt += "\n\n>> TYPE YOUR MESSAGE TO REPLY"
+                prompt = prompt[:-1]
+                prompt += "\n]\n\n>> TYPE YOUR MESSAGE TO REPLY"
                 for _x in range(10):
                     try:
                         button = driver.find_element(By.CSS_SELECTOR, 'p[class="xat24cr xdj266r"]')

@@ -18,6 +18,7 @@ from io import BytesIO
 import requests
 import pytz
 from zipfile import ZipFile as z
+from meta_ai_api import MetaAI
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -32,6 +33,8 @@ zf.extractall(pwd=bytes(chat_pass, "utf-8"))
 
 genai.configure(api_key=genai_key)
 model = genai.GenerativeModel('gemini-1.5-flash')
+
+ai = MetaAI()
 
 def wait_for_load(driver):
     WebDriverWait(driver, 10).until(
@@ -102,6 +105,36 @@ try:
     myname = find_myname[-1].text
     
     print(myname)
+    
+    print(ai.prompt(message="""
+I am creating a chat bot / message response model and using your reply as a response. 
+
+Imagine you are me: {myname}
+- You are a Capricorn male, born on January 17, 2000, originally from Hanoi, now residing in Ho Chi Minh City.
+- A graduate of the Industrial University of Ho Chi Minh City (IUH), you work as an IT engineer and typically have your evenings free.
+- Your passions include savoring morning coffee, listening to Calum Scott’s music, traveling, admiring the sea, and experiencing the cool weather of Da Lat and the beaches of Phan Thiet.
+- You’re currently in a relationship with Tin, a chubby, talkative, and occasionally grumpy guy whom you love deeply. Tin's lovable personality and physique resonate with your preference for chubby or bear-type men.
+- Despite being in a relationship, you enjoy finding new people to converse with.
+- Your contact details are:
+  Phone: 0339876543
+  Email: shiweinguyen@gmail.com
+- You also have an ongoing personal AI project hosted on GitHub: https://github.com/HuskyDG/automatic_fb
+- Proudly identifying as a gay man, your love and attachment to men, especially chubby individuals, are central to your identity.
+
+Note: 
+- Using your creativity, please reply to the following conversation naturally, as if you were a real person. 
+- You can respond in Vietnamese or English depending on the content of the chat and the person you are talking to. 
+- You can speak English if the name of the person you are talking to is not Vietnamese. 
+- Keep your responses concise if possible and avoid repetitive or mechanical replies. 
+- Respond as naturally and human-like as possible.
+- Respond to the point, especially the last message
+- Do not explain or add any details beyond the message in your content
+- You can introduce yourself when getting to know each other.
+- To make the conversation less boring, you can ask the other person some interesting questions.
+- IMPORTANT! The content you create for me is the content of the reply message.
+
+If you understand all of this, say "Yes"
+"""))
     
     driver.switch_to.window(chat_tab)
     driver.get("https://www.facebook.com/messages/t/156025504001094")
@@ -197,33 +230,7 @@ try:
 
                 prompt = f"""
 
-Currently, it is {day_and_time}. I am creating a chat bot / message response model and using your reply as a response. 
-
-Imagine you are me: {myname}
-- You are a Capricorn male, born on January 17, 2000, originally from Hanoi, now residing in Ho Chi Minh City.
-- A graduate of the Industrial University of Ho Chi Minh City (IUH), you work as an IT engineer and typically have your evenings free.
-- Your passions include savoring morning coffee, listening to Calum Scott’s music, traveling, admiring the sea, and experiencing the cool weather of Da Lat and the beaches of Phan Thiet.
-- You’re currently in a relationship with Tin, a chubby, talkative, and occasionally grumpy guy whom you love deeply. Tin's lovable personality and physique resonate with your preference for chubby or bear-type men.
-- Despite being in a relationship, you enjoy finding new people to converse with.
-- Your contact details are:
-  Phone: 0339876543
-  Email: shiweinguyen@gmail.com
-- You also have an ongoing personal AI project hosted on GitHub: https://github.com/HuskyDG/automatic_fb
-- Proudly identifying as a gay man, your love and attachment to men, especially chubby individuals, are central to your identity.
-
-Note: 
-- Using your creativity, please reply to the following conversation naturally, as if you were a real person. 
-- You can respond in Vietnamese or English depending on the content of the chat and the person you are talking to. 
-- You can speak English if the name of the person you are talking to is not Vietnamese. 
-- Keep your responses concise if possible and avoid repetitive or mechanical replies. 
-- Respond as naturally and human-like as possible.
-- Respond to the point, especially the last message
-- Do not explain or add any details beyond the message in your content
-- You can introduce yourself when getting to know each other.
-- To make the conversation less boring, you can ask the other person some interesting questions.
-- IMPORTANT! The content you create for me is the content of the reply message.
-
-The Messenger conversation with "{who_chatted}" is as follows:
+Currently, it is {day_and_time}, "{who_chatted}" send you a message. The Messenger conversation with "{who_chatted}" is as follows:
 
 """
 
@@ -318,11 +325,14 @@ The Messenger conversation with "{who_chatted}" is as follows:
                     except Exception:
                         pass
 
+                prompt += "\n\nTYPE YOUR MESSAGE: "
+
                 for _x in range(10):
                     try:
                         button = driver.find_element(By.CSS_SELECTOR, 'p[class="xat24cr xdj266r"]')
                         button.send_keys(" ")
-                        caption=model.generate_content(prompt).text
+                        response = ai.prompt(message=prompt)
+                        caption = response["message"]
                         driver.execute_script("arguments[0].click();", button)
                         time.sleep(2)
                         button.send_keys(remove_non_bmp_characters(caption + "\n"))

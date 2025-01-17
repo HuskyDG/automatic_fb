@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pillow selenium google-generativeai webdriver-manager pytz
+          pip install pillow selenium google-generativeai webdriver-manager pytz meta-ai-api
 
       # Run the script
       - name: Run script

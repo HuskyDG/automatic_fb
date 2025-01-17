@@ -36,6 +36,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install pillow selenium google-generativeai webdriver-manager pytz
 
+      - name: Cancel previous workflows
+        uses: styfle/cancel-workflow-action@v0.11.0
+        with:
+          access_token: ${{ secrets.GITHUB_TOKEN }}
+
       # Run the script
       - name: Run script
         run: |

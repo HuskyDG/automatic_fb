@@ -274,6 +274,29 @@ try:
                 except Exception:
                     continue
 
+                js_code = """
+                    const targetDivs = document.querySelectorAll('div[dir="auto"][class^="html-div "]');
+
+                    targetDivs.forEach(div => {
+                      // Replace img elements
+                      const imgs = div.querySelectorAll('img[height="16"][width="16"]');
+                      imgs.forEach(img => {
+                        const span = document.createElement('span');
+                        span.textContent = img.alt || 'No alt content';
+                        img.replaceWith(span);
+                      });
+
+                      // Update span elements with a specific class
+                      const spans = div.querySelectorAll('span[class="html-span xexx8yu x4uap5 x18d9i69 xkhd6sd x1hl2dhg x16tdsg8 x1vvkbs x3nfvp2 x1j61x8r x1fcty0u xdj266r xat24cr xgzva0m xhhsvwb xxymvpz xlup9mm x1kky2od"]');
+                      spans.forEach(span => {
+                        span.setAttribute('class', '');
+                      });
+                    });
+                """
+
+                # Execute the JavaScript code
+                driver.execute_script(js_code)
+
                 # Get current date and time
                 current_datetime = datetime.now(pytz.timezone('Asia/Ho_Chi_Minh'))
 
@@ -321,18 +344,20 @@ The Messenger conversation with "{who_chatted}" (nickname: "{nickname}") is as j
                     # Finding name
                     try: 
                         msg_element.find_element(By.CSS_SELECTOR, 'div[class="html-div xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp x11i5rnm x12nagc x1mh8g0r x1yc453h x126k92a xyk4ms5"]').text
-                        name = "Tin nhắn của bạn"
+                        name = "Your message"
                     except Exception:
                         name = None
 
                     if name == None:
                         try: 
                             name = msg_element.find_element(By.CSS_SELECTOR, 'h4').text
+                            name =  f"{who_chatted} ({name})"
                         except Exception:
                             name = None
                     if name == None:
                         try: 
                             name = msg_element.find_element(By.CSS_SELECTOR, 'span[class="html-span xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1hl2dhg x16tdsg8 x1vvkbs xzpqnlu x1hyvwdk xjm9jq1 x6ikm8r x10wlt62 x10l6tqk x1i1rx1s"]').text
+                            name =  f"{who_chatted} ({name})"
                         except Exception:
                             name = None
                     
@@ -361,9 +386,9 @@ The Messenger conversation with "{who_chatted}" (nickname: "{nickname}") is as j
                         # Open the image with PIL
                         image = Image.open(image_file)
                         
-                        img_detail = model.generate_content(["Mô tả bức ảnh", image])
-                        
-                        msg = f"<Đã gửi 1 bức ảnh: {img_detail.text}>"
+                        img_detail = model.generate_content(["Photo description", image])
+                       
+                        prompt += "\n{\"conversation_image_info\": \"" + escape_string(name) + " send an image: " + escape_string(img_detail.text) + "\"},"
                     except Exception:
                         pass
 
@@ -396,9 +421,9 @@ The Messenger conversation with "{who_chatted}" (nickname: "{nickname}") is as j
                         if len(react_elements) > 0:
                             for react_element in react_elements:
                                 emojis += react_element.get_attribute("alt")
-                            emoji_info = f"Tin nhắn trên được thả cảm xúc với các emoji sau: {emojis}"
+                            emoji_info = f"The above message was reacted with following emojis: {emojis}"
                             
-                            prompt += "\n{\"conversation_event\" : \"" + escape_string(emoji_info) + "\"},"
+                            prompt += "\n{\"conversation_reactions\" : \"" + escape_string(emoji_info) + "\"},"
                             
                     except Exception:
                         pass

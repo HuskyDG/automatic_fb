@@ -114,7 +114,13 @@ try:
     chrome_options.add_argument("--headless=new")  # Enable advanced headless mode
     chrome_options.add_argument("--disable-gpu")   # Disable GPU acceleration for compatibility
     chrome_options.add_argument("window-size=1920,1080")  # Set custom window size
-    chrome_options.add_argument("--start-maximized")
+    chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+    chrome_options.add_argument('--no-sandbox') 
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])  
+    chrome_options.add_experimental_option('useAutomationExtension', False)
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_argument("disable-infobars")
     chrome_options.add_argument(f"--user-data-dir={cwd}/scoped_dir")
 
     # Initialize the driver

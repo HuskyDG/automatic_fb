@@ -117,7 +117,6 @@ try:
     chrome_options.add_experimental_option('useAutomationExtension', False)
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
     chrome_options.add_argument("disable-infobars")
-    chrome_options.add_argument(f"--user-data-dir={cwd}/scoped_dir")
     chrome_options.add_argument("--force-device-scale-factor=0.25")
 
     # Initialize the driver

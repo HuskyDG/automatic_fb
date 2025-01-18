@@ -28,15 +28,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pillow selenium google-generativeai webdriver-manager pytz
 
-      # Decrypt
-      - name: Decrypt scoped_dir
-        run: |
-          git lfs pull
-          python scoped_dir_unzip.py
-        env:
-          PYTHONUNBUFFERED: "1"
-          PASSWORD: ${{ secrets.PASSWORD }}
-
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
         with:

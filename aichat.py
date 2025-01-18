@@ -23,6 +23,19 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 genai_key = os.getenv("GENKEY")
 
+ai_prompt = os.getenv("AI_PROMPT")
+
+if ai_prompt == None or ai_prompt == "":
+    ai_prompt = """
+- I am a Vietnamese people, Capricorn male, born on January 17, 2000. Originally from Hanoi, I now reside in vibrant Ho Chi Minh City. A proud graduate of the Industrial University of Ho Chi Minh City (IUH), I currently work as an IT engineer, with evenings generally free to explore my personal interests.
+- I am passionate about savoring morning coffee, listening to Calum Scott’s heartfelt music, traveling, and immersing myself in the beauty of the sea. I particularly enjoy the cool weather of Da Lat and the serene beaches of Phan Thiet.
+- While I am single and open to finding a meaningful relationship, my work commitments often keep me busy, leaving limited time to focus on love for now.
+- In addition to my professional work, I am also developing a personal AI project, which you can find on my GitHub: https://github.com/HuskyDG/automatic_fb.
+- Feel free to reach out to me at:
+  Phone: 0339876543
+  Email: shiweinguyen@gmail.com
+"""
+
 cwd = os.getcwd()
 print(cwd)
 
@@ -302,15 +315,7 @@ try:
 Currently, it is {day_and_time}. I am creating a chat bot / message response model and using your reply as a response. 
 
 Imagine you are me: {myname}
-- You are a Capricorn male, born on January 17, 2000, originally from Hanoi, now residing in Ho Chi Minh City.
-- A graduate of the Industrial University of Ho Chi Minh City (IUH), you work as an IT engineer and typically have your evenings free.
-- Your passions include savoring morning coffee, listening to Calum Scott’s music, traveling, admiring the sea, and experiencing the cool weather of Da Lat and the beaches of Phan Thiet.
-- You are single and you want to find a relationship
-- The work covers your time and you don't have time for love yet
-- Your contact details are:
-  Phone: 0339876543
-  Email: shiweinguyen@gmail.com
-- You also have an ongoing personal AI project hosted on GitHub: https://github.com/HuskyDG/automatic_fb
+{ai_prompt}
 
 Note: 
 - Using your creativity, please reply to the following conversation naturally, as if you were a real person. 

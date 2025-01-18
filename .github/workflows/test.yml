@@ -4,6 +4,18 @@ on:
   schedule:
     - cron: "0 */5 * * *"
   workflow_dispatch:
+    inputs:
+      cookies:
+        description: "Input the cookies value (optional)"
+        required: false
+      ai_prompt:
+        description: "Input the AI prompt (optional)"
+        required: false
+      cancel-workflow:
+        description: "Cancel previous workflow runs (default true)"
+        required: false
+        default: "true"
+        type: boolean  # Chỉ định loại dữ liệu là boolean
 
 jobs:
   run-tests:
@@ -28,7 +40,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # Conditionally cancel previous runs
       - name: Cancel Previous Runs
+        if: ${{ inputs.cancel-workflow == true }}
         uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
@@ -39,5 +53,6 @@ jobs:
           python aichat_timeout.py
         env:
           PYTHONUNBUFFERED: "1"
-          COOKIES: ${{ secrets.MYCOOKIES }}
+          COOKIES: ${{ inputs.cookies || secrets.MYCOOKIES }}
           GENKEY: ${{ secrets.GENKEY }}
+          AI_PROMPT: ${{ inputs.ai_prompt || '' }}

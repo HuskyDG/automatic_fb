@@ -18,6 +18,7 @@ from io import BytesIO
 import requests
 import pytz
 from zipfile import ZipFile as z
+from urllib.parse import urljoin
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -134,6 +135,9 @@ try:
     
     driver.switch_to.new_window('tab')
     friend_tab = driver.current_window_handle
+
+    driver.switch_to.new_window('tab')
+    profile_tab = driver.current_window_handle
     
     driver.switch_to.window(chat_tab)
     
@@ -209,15 +213,31 @@ try:
                 #print(chat_btn.text)
                 try:
                     chat_btn.find_element(By.CSS_SELECTOR, 'span[class="x6s0dn4 xzolkzo x12go9s9 x1rnf11y xprq8jg x9f619 x3nfvp2 xl56j7k x1spa7qu x1kpxq89 xsmyaan"]')
-                    who_chatted = chat_btn.find_element(By.CSS_SELECTOR, 'span[class="x1lliihq x6ikm8r x10wlt62 x1n2onr6 xlyipyv xuxw1ft"]').text
+                    nickname = chat_btn.find_element(By.CSS_SELECTOR, 'span[class="x1lliihq x6ikm8r x10wlt62 x1n2onr6 xlyipyv xuxw1ft"]').text
                 except Exception:
                     continue
-                
-                print("Tin nhắn mới")
+
                 new_chat_coming = True
                 
                 driver.execute_script("arguments[0].click();", chat_btn)
                 time.sleep(2)
+                
+                try:
+                    profile_btn = driver.find_element(By.CSS_SELECTOR, 'a[class="x1i10hfl x1qjc9v5 xjbqb8w xjqpnuy xa49m3k xqeqjp1 x2hbi6w x13fuv20 xu3j5b3 x1q0q8m5 x26u7qi x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xdl72j9 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r x2lwn1j xeuugli xexx8yu x4uap5 x18d9i69 xkhd6sd x1n2onr6 x16tdsg8 x1hl2dhg xggy1nq x1ja2u2z x1t137rt x1o1ewxj x3x9cwd x1e5q0jg x13rtm0m x1q0g3np x87ps6o x1lku1pv x1rg5ohu x1a2a7pz xs83m0k"]')
+                    profile_link = urljoin(driver.current_url, profile_btn.get_attribute("href"))
+                    
+                    driver.switch_to.window(profile_tab)
+                    driver.get(profile_link)
+                    
+                    wait_for_load(driver)
+    
+                    find_who_chatted = driver.find_elements(By.CSS_SELECTOR, 'h1[class^="html-h1 "]')
+                    who_chatted = find_who_chatted[-1].text
+                except Exception:
+                    continue
+                
+                driver.switch_to.window(chat_tab)
+                print("Tin nhắn mới với " + who_chatted)
 
                 try:
                     msg_scroller = driver.find_element(By.CSS_SELECTOR, 'div[class="x78zum5 xdt5ytf x1iyjqo2 x6ikm8r x1odjw0f xish69e x16o0dkt"]')
@@ -287,7 +307,7 @@ Note:
 - To make the conversation less boring, you can ask the other person some interesting questions.
 - IMPORTANT! The content you create for me is the content of the reply message.
 
-The Messenger conversation with "{who_chatted}" is as json here:
+The Messenger conversation with "{who_chatted}" (nickname: "{nickname}") is as json here:
 
 ["""
 

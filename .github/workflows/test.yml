@@ -20,21 +20,22 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
-
-      # Cache Python dependencies
-      - name: Cache pip dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('.github/workflows/run-tests.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          cache: 'pip' # caching pip dependencies
 
       # Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pillow selenium google-generativeai webdriver-manager pytz
+
+      # Decrypt
+      - name: Decrypt scoped_dir
+        run: |
+          git lfs pull
+          python scoped_dir_unzip.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          PASSWORD: ${{ secrets.PASSWORD }}
 
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
@@ -44,10 +45,8 @@ jobs:
       # Run the script
       - name: Run script
         run: |
-          git lfs pull
           python aichat_timeout.py
         env:
           PYTHONUNBUFFERED: "1"
           COOKIES: ${{ secrets.MYCOOKIES }}
           GENKEY: ${{ secrets.GENKEY }}
-          PASSWORD: ${{ secrets.PASSWORD }}

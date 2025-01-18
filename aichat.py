@@ -17,19 +17,14 @@ import base64
 from io import BytesIO
 import requests
 import pytz
-from zipfile import ZipFile as z
 from urllib.parse import urljoin
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-chat_pass = os.getenv("PASSWORD")
 genai_key = os.getenv("GENKEY")
 
 cwd = os.getcwd()
 print(cwd)
-
-zf = z(cwd + "/scoped_dir.zip")
-zf.extractall(pwd=bytes(chat_pass, "utf-8"))
 
 genai.configure(api_key=genai_key)
 model = genai.GenerativeModel('gemini-1.5-flash')

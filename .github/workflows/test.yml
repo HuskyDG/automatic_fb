@@ -1,4 +1,4 @@
-name: Run test_cookies.py
+name: Run AI Chat on Messenger account
 
 on:
   schedule:

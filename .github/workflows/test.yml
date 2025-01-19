@@ -14,6 +14,9 @@ on:
       otp_secret:
         description: "Input App authenticator OTP Secret (optional)"
         required: false
+      one_time_code:
+        description: "Input one time code to decrypt p2p chat (optional)"
+        required: false
       alt_account:
         description: "Input the index of account if the facebook account has multiple accounts, 0 for main account"
         default: "0"
@@ -83,8 +86,11 @@ jobs:
       # Run the script
       - name: Run script
         run: |
+          python one-time-code_unzip.py
           python aichat_timeout.py
         env:
           PYTHONUNBUFFERED: "1"
           GENKEY: ${{ secrets.GENKEY }}
           AI_PROMPT: ${{ inputs.ai_prompt || '' }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          ONETIMECODE: ${{ inputs.one_time_code }}

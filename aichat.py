@@ -134,6 +134,7 @@ try:
 
     # Initialize the driver
     driver = webdriver.Chrome(options=chrome_options)
+    actions = ActionChains(driver)
 
     tz_params = {'timezoneId': 'Asia/Ho_Chi_Minh'}
     driver.execute_cdp_cmd('Emulation.setTimezoneOverride', tz_params)
@@ -157,7 +158,15 @@ try:
         cache_fb = json.load(f)
     except Exception:
         cache_fb = json.loads(os.getenv("COOKIES")) #legacy
-        
+    
+    onetimecode = os.getenv("ONETIMECODE")
+    if onetimecode == None or onetimecode == "":
+        try:
+            f = open("one-time-code.txt", "r")
+            onetimecode = read(f.read())
+        except Exception:
+            onetimecode = ""
+
     driver.execute_cdp_cmd("Emulation.setScriptExecutionDisabled", {"value": True})
     driver.get("https://www.facebook.com")
     driver.delete_all_cookies()
@@ -218,7 +227,19 @@ try:
 
             driver.switch_to.window(chat_tab)
             inject_reload(driver)
-            
+            try:
+                otc_input = driver.find_element(By.CSS_SELECTOR, 'input[autocomplete="one-time-code"]')
+                driver.execute_script("arguments[0].setAttribute('class', '');", otc_input)
+                print("Giải mã đoạn chat được mã hóa...")
+                actions.move_to_element(otc_input).click().perform()
+                time.sleep(2)
+                for digit in onetimecode:
+                    actions.move_to_element(otc_input).send_keys(digit).perform()  # Send the digit to the input element
+                    time.sleep(1)  # Wait for 1s before sending the next digit
+                continue
+            except Exception:
+                pass
+
             # find all unread single chats not group (span[class="x6s0dn4 xzolkzo x12go9s9 x1rnf11y xprq8jg x9f619 x3nfvp2 xl56j7k x1spa7qu x1kpxq89 xsmyaan"])
             chat_btns = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"]')
             for chat_btn in chat_btns:

@@ -310,9 +310,8 @@ try:
                 # Format the output
                 day_and_time = current_datetime.strftime("%A, %d %B %Y - %H:%M:%S")
 
-                prompt = f"""
-
-Currently, it is {day_and_time}. I am creating a chat bot / message response model and using your reply as a response. 
+                header_prompt = f"""
+I am creating a chat bot / message response model and using your reply as a response. 
 
 Imagine you are me: {myname}
 {ai_prompt}
@@ -329,9 +328,11 @@ Note:
 - To make the conversation less boring, you can ask the other person some interesting questions.
 - IMPORTANT! The content you create for me is the content of the reply message.
 
-The Messenger conversation with "{who_chatted}" (nickname: "{nickname}") is as json here:
 
-["""
+Currently, it is {day_and_time}, you receives a message from "{who_chatted}" (nickname: "{nickname}"). The Messenger conversation with "{who_chatted}" (nickname: "{nickname}") is as json here:
+
+"""
+                prompt = "["
 
                 for msg_element in msg_elements:
                     try:
@@ -428,12 +429,12 @@ The Messenger conversation with "{who_chatted}" (nickname: "{nickname}") is as j
                         pass
 
                 prompt = prompt[:-1]
-                prompt += "\n]\n\n>> TYPE YOUR MESSAGE TO REPLY"
+                prompt += "\n]"
                 for _x in range(10):
                     try:
                         button = driver.find_element(By.CSS_SELECTOR, 'p[class="xat24cr xdj266r"]')
                         button.send_keys(" ")
-                        caption=model.generate_content(prompt).text
+                        caption=model.generate_content(header_prompt + prompt + "\n\n>> TYPE YOUR MESSAGE TO REPLY").text
                         driver.execute_script("arguments[0].click();", button)
                         time.sleep(2)
                         button.send_keys(remove_non_bmp_characters(replace_emoji_with_shortcut(caption) + "\n"))

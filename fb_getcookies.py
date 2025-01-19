@@ -17,7 +17,7 @@ def generate_otp(secret_key):
     totp = pyotp.TOTP(secret_key)
     return totp.now()
 
-def get_fb_cookies(username, password, auth_code = None, finally_stop = False, filename = "cookies.json"):
+def get_fb_cookies(username, password, auth_code = None, alt_account = 0, finally_stop = False, filename = "cookies.json"):
     try:
         # Set Chrome options
         chrome_options = Options()
@@ -96,14 +96,22 @@ def get_fb_cookies(username, password, auth_code = None, finally_stop = False, f
         )
 
         find_myname = driver.find_elements(By.CSS_SELECTOR, 'h1[class^="html-h1 "]')
-        
+        if alt_account > 0:
+            accounts_btn = driver.find_element(By.CSS_SELECTOR, 'image[style="height:40px;width:40px"]')
+            actions.move_to_element(accounts_btn).click().perform() # Click on accounts setting
+            time.sleep(1)
+            account_list_panel = driver.find_element(By.CSS_SELECTOR, 'div[role="list"][class="html-div xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd"]')
+            account_list_btns = account_list_panel.find_elements(By.CSS_SELECTOR, 'div[role="listitem"]')
+            if alt_account <= len(account_list_btns):
+                actions.move_to_element(account_list_btns[alt_account -1]).click().perform()
+                time.sleep(3)
+
         if finally_stop:
             input("Press Enter to extract the cookies")
         
         f = open(filename, "w")
         json.dump(driver.get_cookies(), f)
         f.close()
+
     finally:
         driver.quit()
-
-get_fb_cookies("fbuser.email@gmail.com", "password", "")

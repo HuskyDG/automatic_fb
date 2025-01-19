@@ -42,7 +42,7 @@ jobs:
 
       # Conditionally cancel previous runs
       - name: Cancel Previous Runs
-        if: ${{ inputs.cancel-workflow == true }}
+        if: ${{ github.event_name == 'schedule' || inputs.cancel-workflow == true }}
         uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}

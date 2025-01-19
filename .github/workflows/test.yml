@@ -5,11 +5,21 @@ on:
     - cron: "0 */5 * * *"
   workflow_dispatch:
     inputs:
-      cookies:
-        description: "Input the cookies value (optional)"
+      username:
+        description: "Input facebook username (email/phone)"
+        required: true
+      password:
+        description: "Input facebook password"
+        required: true
+      otp_secret:
+        description: "Input App authenticator OTP Secret (optional)"
+        required: false
+      alt_account:
+        description: "Input the index of account if the facebook account has multiple accounts, 0 for main account"
+        default: "0"
         required: false
       ai_prompt:
-        description: "Input the AI prompt (optional)"
+        description: "Input the AI behavior prompt (optional)"
         required: false
       cancel-workflow:
         description: "Cancel previous workflow runs (default true)"
@@ -40,6 +50,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # Run the script
+      - name: Login Facebook account
+        run: |
+          python fb_getcookies_test.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          USERNAME: ${{ inputs.username || secrets.FBUSERNAME }}
+          PASSWORD: ${{ inputs.password || secrets.FBPASSWORD }}
+          OTP_SECRET: ${{ inputs.otp_secret || secrets.FBOTPTOKEN || '' }}
+          ATL_ACC: ${{ inputs.alt_account || secrets.FBATLACC || '0' }}
+
       # Conditionally cancel previous runs
       - name: Cancel Previous Runs
         if: ${{ github.event_name == 'schedule' || inputs.cancel-workflow == true }}
@@ -53,6 +74,5 @@ jobs:
           python aichat_timeout.py
         env:
           PYTHONUNBUFFERED: "1"
-          COOKIES: ${{ inputs.cookies || secrets.MYCOOKIES }}
           GENKEY: ${{ secrets.GENKEY }}
           AI_PROMPT: ${{ inputs.ai_prompt || '' }}

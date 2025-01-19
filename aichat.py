@@ -151,7 +151,12 @@ try:
     wait = WebDriverWait(driver, 10)
     
     print("Đang tải dữ liệu từ cookies")
-    cache_fb = json.loads(os.getenv("COOKIES"))
+    
+    try:
+        f = open("cookies.json", "r")
+        cache_fb = json.load(f)
+    except Exception:
+        cache_fb = json.loads(os.getenv("COOKIES")) #legacy
         
     driver.execute_cdp_cmd("Emulation.setScriptExecutionDisabled", {"value": True})
     driver.get("https://www.facebook.com")

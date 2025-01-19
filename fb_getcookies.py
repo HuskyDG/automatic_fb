@@ -109,6 +109,16 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
                 actions.move_to_element(account_list_btns[alt_account -1]).click().perform()
                 time.sleep(3)
 
+        driver.get("https://www.facebook.com/profile.php")
+
+        WebDriverWait(driver, 10).until(
+            lambda d: d.execute_script("return document.readyState") == "complete"
+        )
+
+        find_myname = driver.find_elements(By.CSS_SELECTOR, 'h1[class^="html-h1 "]')
+        myname = find_myname[-1].text
+        print(myname)
+
         if finally_stop:
             input("Press Enter to extract the cookies")
         

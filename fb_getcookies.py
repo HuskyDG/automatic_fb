@@ -17,7 +17,7 @@ def generate_otp(secret_key):
     totp = pyotp.TOTP(secret_key)
     return totp.now()
 
-def get_fb_cookies(username, password, auth_code = None, alt_account = 0, finally_stop = False, filename = "cookies.json"):
+def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, finally_stop = False, filename = "cookies.json"):
     try:
         # Set Chrome options
         chrome_options = Options()
@@ -78,7 +78,7 @@ def get_fb_cookies(username, password, auth_code = None, alt_account = 0, finall
             other_veri_btn = driver.find_element(By.CSS_SELECTOR, 'input[type="text"]')
             actions.move_to_element(other_veri_btn).click().perform() # Click on input code
             time.sleep(random.randint(1,3))
-            actions.move_to_element(other_veri_btn).send_keys(generate_otp(auth_code)).perform() # Type in code on input
+            actions.move_to_element(other_veri_btn).send_keys(generate_otp(otp_secret)).perform() # Type in code on input
             time.sleep(random.randint(1,3))
             other_veri_btn = driver.find_element(By.CSS_SELECTOR, 'div[class="x1ja2u2z x78zum5 x2lah0s x1n2onr6 xl56j7k x6s0dn4 xozqiw3 x1q0g3np x972fbf xcfux6l x1qhh985 xm0m39n x9f619 xtvsq51 xi112ho x17zwfj4 x585lrc x1403ito x1fq8qgq x1ghtduv x1oktzhs"]')
             actions.move_to_element(other_veri_btn).click().perform() # Click Confirmed
@@ -96,6 +96,9 @@ def get_fb_cookies(username, password, auth_code = None, alt_account = 0, finall
         )
 
         find_myname = driver.find_elements(By.CSS_SELECTOR, 'h1[class^="html-h1 "]')
+        myname = find_myname[-1].text
+        print(myname)
+
         if alt_account > 0:
             accounts_btn = driver.find_element(By.CSS_SELECTOR, 'image[style="height:40px;width:40px"]')
             actions.move_to_element(accounts_btn).click().perform() # Click on accounts setting

@@ -3,3 +3,4 @@ selenium
 google-generativeai
 webdriver-manager
 pytz
+pyotp

@@ -52,14 +52,26 @@ jobs:
 
       # Run the script
       - name: Login Facebook account
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          python logininfo_unzip.py
+          python fb_getcookies_test.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          PASSWORD: ${{ secrets.PASSWORD }}
+          USE_ENV_SETUP: "false"
+
+      - name: Login Facebook account
+        if: ${{ github.event_name != 'schedule' }}
         run: |
           python fb_getcookies_test.py
         env:
           PYTHONUNBUFFERED: "1"
-          USERNAME: ${{ inputs.username || secrets.FBUSERNAME }}
-          PASSWORD: ${{ inputs.password || secrets.FBPASSWORD }}
-          OTP_SECRET: ${{ inputs.otp_secret || secrets.FBOTPTOKEN || '' }}
-          ATL_ACC: ${{ inputs.alt_account || secrets.FBATLACC || '0' }}
+          USE_ENV_SETUP: "true"
+          USERNAME: ${{ inputs.username }}
+          PASSWORD: ${{ inputs.password }}
+          OTP_SECRET: ${{ inputs.otp_secret || '' }}
+          ATL_ACC: ${{ inputs.alt_account || '0' }}
 
       # Conditionally cancel previous runs
       - name: Cancel Previous Runs

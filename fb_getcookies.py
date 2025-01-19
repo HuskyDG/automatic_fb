@@ -94,10 +94,7 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
         WebDriverWait(driver, 10).until(
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
-
-        find_myname = driver.find_elements(By.CSS_SELECTOR, 'h1[class^="html-h1 "]')
-        myname = find_myname[-1].text
-        print(myname)
+        time.sleep(3)
 
         if alt_account > 0:
             accounts_btn = driver.find_element(By.CSS_SELECTOR, 'image[style="height:40px;width:40px"]')
@@ -114,7 +111,7 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
         WebDriverWait(driver, 10).until(
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
-
+        time.sleep(3)
         find_myname = driver.find_elements(By.CSS_SELECTOR, 'h1[class^="html-h1 "]')
         myname = find_myname[-1].text
         print(myname)

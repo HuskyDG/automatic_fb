@@ -264,7 +264,7 @@ try:
                     continue
                 
                 driver.switch_to.window(chat_tab)
-                print("Tin nhắn mới với " + who_chatted)
+                print("Tin nhắn mới từ " + who_chatted)
 
                 try:
                     msg_scroller = driver.find_element(By.CSS_SELECTOR, 'div[class="x78zum5 xdt5ytf x1iyjqo2 x6ikm8r x1odjw0f xish69e x16o0dkt"]')
@@ -329,6 +329,8 @@ try:
 
                 # Format the output
                 day_and_time = current_datetime.strftime("%A, %d %B %Y - %H:%M:%S")
+                
+                prompt_list = []
 
                 header_prompt = f"""
 I am creating a chat bot / message response model and using your reply as a response. 
@@ -352,12 +354,12 @@ Note:
 Currently, it is {day_and_time}, you receives a message from "{who_chatted}". The Messenger conversation with "{who_chatted}" is as json here:
 
 """
-                prompt = "["
+                prompt_list.append(header_prompt)
 
                 for msg_element in msg_elements:
                     try:
                         timedate = msg_element.find_element(By.CSS_SELECTOR, 'span[class="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x676frb x1pg5gke xvq8zen xo1l8bm x12scifz"]')
-                        prompt += "\n{\"conversation_event\" : \"" + timedate.text + "\"},"
+                        prompt_list.append("{\"conversation_event\" : \"" + timedate.text + "\"}")
                     except Exception:
                         pass
                         
@@ -405,10 +407,10 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                         image_file = BytesIO(image_data)
                         # Open the image with PIL
                         image = Image.open(image_file)
-                        
-                        img_detail = model.generate_content(["Photo description", image])
                        
-                        prompt += "\n{\"conversation_image_info\": \"" + escape_string(name) + " send an image: " + escape_string(img_detail.text) + "\"},"
+                        prompt_list.append("{\"conversation_image\": \"" + escape_string(name) + " send an image\"}")
+                        prompt_list.append(image)
+                        
                     except Exception:
                         pass
 
@@ -433,7 +435,14 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                         continue
                     if name == None:
                         name = "None"
-                    prompt += "\n{\"conversation_message\": {\"" + escape_string(name) + "\" : \"" + escape_string(msg) + "\"}},"
+
+                    try:
+                        quotes_text = msg_element.find_element(By.CSS_SELECTOR, 'div[class="xi81zsa x126k92a"]').text
+                        quotes = "\"" + escape_string(quotes_text) + "\""
+                    except Exception:
+                        quotes = "null"
+                    
+                    prompt_list.append("{\"conversation_message\": {\"" + escape_string(name) + "\" : \"" + escape_string(msg) + "\"}, \"replied_to_message\" : " + quotes + "}")
 
                     try: 
                         react_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[height="16"][width="16"]')
@@ -443,23 +452,25 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                                 emojis += react_element.get_attribute("alt")
                             emoji_info = f"The above message was reacted with following emojis: {emojis}"
                             
-                            prompt += "\n{\"conversation_reactions\" : \"" + escape_string(emoji_info) + "\"},"
+                            prompt_list.append("{\"conversation_reactions\" : \"" + escape_string(emoji_info) + "\"}")
                             
                     except Exception:
                         pass
 
-                prompt = prompt[:-1]
-                prompt += "\n]"
+                prompt_list.append("TYPE YOUR MESSAGE TO REPLY")
+                
+                for prompt in prompt_list:
+                    print(prompt)
+
                 for _x in range(10):
                     try:
                         button = driver.find_element(By.CSS_SELECTOR, 'p[class="xat24cr xdj266r"]')
                         button.send_keys(" ")
-                        caption=model.generate_content(header_prompt + prompt + "\n\n>> TYPE YOUR MESSAGE TO REPLY").text
+                        caption=model.generate_content(prompt_list).text
                         driver.execute_script("arguments[0].click();", button)
                         time.sleep(2)
                         button.send_keys(remove_non_bmp_characters(replace_emoji_with_shortcut(caption) + "\n"))
-                        
-                        print(prompt)
+
                         print("AI Trả lời:", caption)
                         time.sleep(2)
 

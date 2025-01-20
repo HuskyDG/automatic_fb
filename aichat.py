@@ -269,6 +269,7 @@ try:
                 try:
                     msg_scroller = driver.find_element(By.CSS_SELECTOR, 'div[class="x78zum5 xdt5ytf x1iyjqo2 x6ikm8r x1odjw0f xish69e x16o0dkt"]')
                     for _x in range(30):
+                        # Convert div to disabled-div to prevent message from disappearing before collection
                         driver.execute_script("""
     var divs = document.querySelectorAll('div.x78zum5.xdt5ytf[data-virtualized="false"]');
     divs.forEach(function(div) {
@@ -280,7 +281,7 @@ try:
                         driver.execute_script("""
     var divs = document.querySelectorAll('div.x78zum5.xdt5ytf[data-virtualized="true"]');
     divs.forEach(function(div) {
-        var disabledDiv = document.createElement('disabled-div');
+        var disabledDiv = document.createElement('disabled-div'); //
         disabledDiv.innerHTML = div.innerHTML;  // Keep the content inside
         div.parentNode.replaceChild(disabledDiv, div);  // Replace the div with the custom tag
     });
@@ -288,8 +289,11 @@ try:
 
                         driver.execute_script("arguments[0].scrollTop = 0;", msg_scroller)
                         time.sleep(0.1)
+                    driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight;", msg_scroller)
                 except Exception:
                     pass
+
+                time.sleep(1)
 
                 try:
                     msg_table = driver.find_element(By.CSS_SELECTOR, 'div[class="x1uipg7g xu3j5b3 xol2nv xlauuyb x26u7qi x19p7ews x78zum5 xdt5ytf x1iyjqo2 x6ikm8r x10wlt62"]')

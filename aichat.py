@@ -247,7 +247,6 @@ try:
                 #print(chat_btn.text)
                 try:
                     chat_btn.find_element(By.CSS_SELECTOR, 'span[class="x6s0dn4 xzolkzo x12go9s9 x1rnf11y xprq8jg x9f619 x3nfvp2 xl56j7k x1spa7qu x1kpxq89 xsmyaan"]')
-                    nickname = chat_btn.find_element(By.CSS_SELECTOR, 'span[class="x1lliihq x6ikm8r x10wlt62 x1n2onr6 xlyipyv xuxw1ft"]').text
                 except Exception:
                     continue
 
@@ -356,7 +355,7 @@ Note:
 - IMPORTANT! The content you create for me is the content of the reply message.
 
 
-Currently, it is {day_and_time}, you receives a message from "{who_chatted}" (nickname: "{nickname}"). The Messenger conversation with "{who_chatted}" (nickname: "{nickname}") is as json here:
+Currently, it is {day_and_time}, you receives a message from "{who_chatted}". The Messenger conversation with "{who_chatted}" is as json here:
 
 """
                 prompt = "["

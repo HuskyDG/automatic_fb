@@ -70,23 +70,32 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
         #input()
+        time.sleep(5)
         if driver.current_url.startswith("https://www.facebook.com/two_step_verification/"):
-            other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[role="button"]')
-            actions.move_to_element(other_veri_btn).click().perform() # Click other verification method
-            time.sleep(random.randint(3,6))
-            other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[id=":r5:"]')
-            actions.move_to_element(other_veri_btn).click().perform() # Click App Auth method
-            time.sleep(random.randint(3,6))
-            other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[class="x1ja2u2z x78zum5 x2lah0s x1n2onr6 xl56j7k x6s0dn4 xozqiw3 x1q0g3np x972fbf xcfux6l x1qhh985 xm0m39n x9f619 xtvsq51 xi112ho x17zwfj4 x585lrc x1403ito x1fq8qgq x1ghtduv x1oktzhs"]')
-            actions.move_to_element(other_veri_btn).click().perform() # Click Continue
-            time.sleep(random.randint(3,6))
-            other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'input[type="text"]')
-            actions.move_to_element(other_veri_btn).click().perform() # Click on input code
-            time.sleep(random.randint(3,6))
-            actions.move_to_element(other_veri_btn).send_keys(generate_otp(otp_secret)).perform() # Type in code on input
-            time.sleep(random.randint(3,6))
-            other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[class="x1ja2u2z x78zum5 x2lah0s x1n2onr6 xl56j7k x6s0dn4 xozqiw3 x1q0g3np x972fbf xcfux6l x1qhh985 xm0m39n x9f619 xtvsq51 xi112ho x17zwfj4 x585lrc x1403ito x1fq8qgq x1ghtduv x1oktzhs"]')
-            actions.move_to_element(other_veri_btn).click().perform() # Click Confirmed
+            url_veri = driver.current_url
+            for i in range(10):
+                try:
+                    other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[role="button"]')
+                    actions.move_to_element(other_veri_btn).click().perform() # Click other verification method
+                    time.sleep(random.randint(5,8))
+                    other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[id=":r5:"]')
+                    actions.move_to_element(other_veri_btn).click().perform() # Click App Auth method
+                    time.sleep(random.randint(5,8))
+                    other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[class="x1ja2u2z x78zum5 x2lah0s x1n2onr6 xl56j7k x6s0dn4 xozqiw3 x1q0g3np x972fbf xcfux6l x1qhh985 xm0m39n x9f619 xtvsq51 xi112ho x17zwfj4 x585lrc x1403ito x1fq8qgq x1ghtduv x1oktzhs"]')
+                    actions.move_to_element(other_veri_btn).click().perform() # Click Continue
+                    time.sleep(random.randint(5,8))
+                    other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'input[type="text"]')
+                    actions.move_to_element(other_veri_btn).click().perform() # Click on input code
+                    time.sleep(random.randint(5,8))
+                    actions.move_to_element(other_veri_btn).send_keys(generate_otp(otp_secret)).perform() # Type in code on input
+                    time.sleep(random.randint(5,8))
+                    other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[class="x1ja2u2z x78zum5 x2lah0s x1n2onr6 xl56j7k x6s0dn4 xozqiw3 x1q0g3np x972fbf xcfux6l x1qhh985 xm0m39n x9f619 xtvsq51 xi112ho x17zwfj4 x585lrc x1403ito x1fq8qgq x1ghtduv x1oktzhs"]')
+                    actions.move_to_element(other_veri_btn).click().perform() # Click Confirmed
+                    break
+                except Exception as e:
+                    print(f"Try again {i}:", e)
+                    driver.get(url_veri)
+                    time.sleep(5)
             
         #input()
         

@@ -42,15 +42,20 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
         driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
         actions = ActionChains(driver)
+        
+        wait = WebDriverWait(driver, 10)
+        
+        def find_element_when_clickable(by, selector):
+            return wait.until(EC.element_to_be_clickable((by, selector)))
 
         driver.get("https://www.facebook.com/login")
-        WebDriverWait(driver, 10).until(
+        wait.until(
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
         time.sleep(0.5)
 
-        email_input = driver.find_element(By.NAME, "email")
-        password_input = driver.find_element(By.NAME, "pass")
+        email_input = find_element_when_clickable(By.NAME, "email")
+        password_input = find_element_when_clickable(By.NAME, "pass")
         actions.move_to_element(email_input).click().perform()
         time.sleep(random.randint(3,6))
         actions.move_to_element(email_input).send_keys(username).perform()
@@ -59,48 +64,48 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
         actions.move_to_element(password_input).send_keys(password).perform()
         
         time.sleep(random.randint(3,6))
-        button = driver.find_element(By.CSS_SELECTOR, 'button[id="loginbutton"]')
+        button = find_element_when_clickable(By.CSS_SELECTOR, 'button[id="loginbutton"]')
         actions.move_to_element(button).click().perform()
-        WebDriverWait(driver, 10).until(
+        wait.until(
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
         #input()
         if driver.current_url.startswith("https://www.facebook.com/two_step_verification/"):
-            other_veri_btn = driver.find_element(By.CSS_SELECTOR, 'div[role="button"]')
+            other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[role="button"]')
             actions.move_to_element(other_veri_btn).click().perform() # Click other verification method
             time.sleep(random.randint(3,6))
-            other_veri_btn = driver.find_element(By.CSS_SELECTOR, 'div[id=":r5:"]')
+            other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[id=":r5:"]')
             actions.move_to_element(other_veri_btn).click().perform() # Click App Auth method
             time.sleep(random.randint(3,6))
-            other_veri_btn = driver.find_element(By.CSS_SELECTOR, 'div[class="x1ja2u2z x78zum5 x2lah0s x1n2onr6 xl56j7k x6s0dn4 xozqiw3 x1q0g3np x972fbf xcfux6l x1qhh985 xm0m39n x9f619 xtvsq51 xi112ho x17zwfj4 x585lrc x1403ito x1fq8qgq x1ghtduv x1oktzhs"]')
+            other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[class="x1ja2u2z x78zum5 x2lah0s x1n2onr6 xl56j7k x6s0dn4 xozqiw3 x1q0g3np x972fbf xcfux6l x1qhh985 xm0m39n x9f619 xtvsq51 xi112ho x17zwfj4 x585lrc x1403ito x1fq8qgq x1ghtduv x1oktzhs"]')
             actions.move_to_element(other_veri_btn).click().perform() # Click Continue
             time.sleep(random.randint(3,6))
-            other_veri_btn = driver.find_element(By.CSS_SELECTOR, 'input[type="text"]')
+            other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'input[type="text"]')
             actions.move_to_element(other_veri_btn).click().perform() # Click on input code
             time.sleep(random.randint(3,6))
             actions.move_to_element(other_veri_btn).send_keys(generate_otp(otp_secret)).perform() # Type in code on input
             time.sleep(random.randint(3,6))
-            other_veri_btn = driver.find_element(By.CSS_SELECTOR, 'div[class="x1ja2u2z x78zum5 x2lah0s x1n2onr6 xl56j7k x6s0dn4 xozqiw3 x1q0g3np x972fbf xcfux6l x1qhh985 xm0m39n x9f619 xtvsq51 xi112ho x17zwfj4 x585lrc x1403ito x1fq8qgq x1ghtduv x1oktzhs"]')
+            other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[class="x1ja2u2z x78zum5 x2lah0s x1n2onr6 xl56j7k x6s0dn4 xozqiw3 x1q0g3np x972fbf xcfux6l x1qhh985 xm0m39n x9f619 xtvsq51 xi112ho x17zwfj4 x585lrc x1403ito x1fq8qgq x1ghtduv x1oktzhs"]')
             actions.move_to_element(other_veri_btn).click().perform() # Click Confirmed
             
         #input()
         
-        WebDriverWait(driver, 10).until(
+        wait.until(
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
         time.sleep(5)
         driver.get("https://www.facebook.com/profile.php")
 
-        WebDriverWait(driver, 10).until(
+        wait.until(
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
         time.sleep(3)
 
         if alt_account > 0:
-            accounts_btn = driver.find_element(By.CSS_SELECTOR, 'image[style="height:40px;width:40px"]')
+            accounts_btn = find_element_when_clickable(By.CSS_SELECTOR, 'image[style="height:40px;width:40px"]')
             actions.move_to_element(accounts_btn).click().perform() # Click on accounts setting
             time.sleep(1)
-            account_list_panel = driver.find_element(By.CSS_SELECTOR, 'div[role="list"][class="html-div xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd"]')
+            account_list_panel = find_element_when_clickable(By.CSS_SELECTOR, 'div[role="list"][class="html-div xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd"]')
             account_list_btns = account_list_panel.find_elements(By.CSS_SELECTOR, 'div[role="listitem"]')
             if alt_account <= len(account_list_btns):
                 actions.move_to_element(account_list_btns[alt_account -1]).click().perform()
@@ -108,7 +113,7 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
 
         driver.get("https://www.facebook.com/profile.php")
 
-        WebDriverWait(driver, 10).until(
+        wait.until(
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
         time.sleep(3)

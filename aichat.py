@@ -26,15 +26,8 @@ genai_key = os.getenv("GENKEY")
 ai_prompt = os.getenv("AI_PROMPT")
 
 if ai_prompt == None or ai_prompt == "":
-    ai_prompt = """
-- I am a Vietnamese people, Capricorn male, born on January 17, 2000. Originally from Hanoi, I now reside in vibrant Ho Chi Minh City. A proud graduate of the Industrial University of Ho Chi Minh City (IUH), I currently work as an IT engineer, with evenings generally free to explore my personal interests.
-- I am passionate about savoring morning coffee, listening to Calum Scott’s heartfelt music, traveling, and immersing myself in the beauty of the sea. I particularly enjoy the cool weather of Da Lat and the serene beaches of Phan Thiet.
-- While I am single and open to finding a meaningful relationship, my work commitments often keep me busy, leaving limited time to focus on love for now.
-- In addition to my professional work, I am also developing a personal AI project, which you can find on my GitHub: https://github.com/HuskyDG/automatic_fb.
-- Feel free to reach out to me at:
-  Phone: 0339876543
-  Email: shiweinguyen@gmail.com
-"""
+    f = open("introduction.txt", "r")
+    ai_prompt = f.read()
 
 cwd = os.getcwd()
 print(cwd)
@@ -185,6 +178,7 @@ try:
     myname = find_myname[-1].text
     
     print(myname)
+    print(ai_prompt)
     
     driver.switch_to.window(chat_tab)
     driver.get("https://www.facebook.com/messages/t/156025504001094")

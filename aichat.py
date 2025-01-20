@@ -120,7 +120,7 @@ try:
         "profile.default_content_setting_values.notifications": 1  # 1 allows notifications, 2 blocks
     }
     chrome_options.add_experimental_option("prefs", prefs)
-    chrome_options.add_argument("--headless=new")  # Enable advanced headless mode
+    #chrome_options.add_argument("--headless=new")  # Enable advanced headless mode
     chrome_options.add_argument("--disable-gpu")   # Disable GPU acceleration for compatibility
     chrome_options.add_argument(f"window-size={1920*2},{1080*2}")  # Set custom window size
     chrome_options.add_argument('--disable-blink-features=AutomationControlled')
@@ -163,9 +163,10 @@ try:
     if onetimecode == None or onetimecode == "":
         try:
             f = open("one-time-code.txt", "r")
-            onetimecode = read(f.read())
-        except Exception:
+            onetimecode = f.read()
+        except Exception as e:
             onetimecode = ""
+            print(e)
 
     driver.execute_cdp_cmd("Emulation.setScriptExecutionDisabled", {"value": True})
     driver.get("https://www.facebook.com")

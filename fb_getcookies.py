@@ -42,7 +42,7 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
         driver = webdriver.Chrome(options=chrome_options)
 
         driver.execute_cdp_cmd("Emulation.setUserAgentOverride", {
-            "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36"
+            "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36"
         })
 
         driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -70,7 +70,7 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
         actions.move_to_element(password_input).send_keys(password).perform()
         
         time.sleep(random.randint(3,6))
-        button = find_element_when_clickable(By.XPATH, '//span[@data-bloks-name="bk.components.TextSpan" and contains(text(), "Log in")]')
+        button = find_element_when_clickable(By.CSS_SELECTOR, 'div[aria-label="Log in"]')
         actions.move_to_element(button).click().perform()
         wait.until(
             lambda d: d.execute_script("return document.readyState") == "complete"

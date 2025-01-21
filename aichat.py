@@ -339,31 +339,17 @@ try:
                 header_prompt = f"""
 I am creating a chat bot / message response model and using your reply as a response. 
 
-Imagine you are me: {myname}
+Pretending that you are me: {myname}
 {ai_prompt}
-
-Note: 
-- Using your creativity, please reply to the following conversation naturally, as if you were a real person. 
-- You can respond in Vietnamese or English depending on the content of the chat and the person you are talking to. 
-- You can speak English if the name of the person you are talking to is not Vietnamese. 
-- Keep your responses concise if possible and avoid repetitive or mechanical replies. 
-- Respond as naturally and human-like as possible.
-- Respond to the point, especially the last message
-- Do not explain or add any details beyond the message in your content
-- You can introduce yourself when getting to know each other.
-- To make the conversation less boring, you can ask the other person some interesting questions.
-- IMPORTANT! The content you create for me is the content of the reply message.
-
 
 Currently, it is {day_and_time}, you receives a message from "{who_chatted}". The Messenger conversation with "{who_chatted}" is as json here:
 
 """
-                prompt_list.append(header_prompt)
 
                 for msg_element in msg_elements:
                     try:
                         timedate = msg_element.find_element(By.CSS_SELECTOR, 'span[class="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x676frb x1pg5gke xvq8zen xo1l8bm x12scifz"]')
-                        prompt_list.append("{\"conversation_event\" : \"" + timedate.text + "\"}")
+                        prompt_list.append(json.dumps({"conversation_event" : timedate.text}))
                     except Exception:
                         pass
                         
@@ -412,7 +398,7 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                         # Open the image with PIL
                         image = Image.open(image_file)
                        
-                        prompt_list.append("{\"conversation_image\": \"" + escape_string(name) + " send an image\"}")
+                        prompt_list.append(json.dumps({"conversation_image": {name : "send an image"}}))
                         prompt_list.append(image)
                         
                     except Exception:
@@ -442,11 +428,12 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
 
                     try:
                         quotes_text = msg_element.find_element(By.CSS_SELECTOR, 'div[class="xi81zsa x126k92a"]').text
-                        quotes = "\"" + escape_string(quotes_text) + "\""
                     except Exception:
-                        quotes = "null"
+                        quotes_text = None
                     
-                    prompt_list.append("{\"conversation_message\": {\"" + escape_string(name) + "\" : \"" + escape_string(msg) + "\"}, \"replied_to_message\" : " + quotes + "}")
+                    prompt_list.append(json.dumps(
+                    {"conversation_message": {name : msg},
+                     "replied_to_message" : quotes_text }))
 
                     try: 
                         react_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[height="16"][width="16"]')
@@ -456,21 +443,36 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                                 emojis += react_element.get_attribute("alt")
                             emoji_info = f"The above message was reacted with following emojis: {emojis}"
                             
-                            prompt_list.append("{\"conversation_reactions\" : \"" + escape_string(emoji_info) + "\"}")
+                            prompt_list.append(json.dumps({"conversation_reactions" : emoji_info}))
                             
                     except Exception:
                         pass
 
-                prompt_list.append("TYPE YOUR MESSAGE TO REPLY")
-                
                 for prompt in prompt_list:
                     print(prompt)
+                prompt_list.insert(0, header_prompt)
+                prompt_list.append("""
+
+Note: 
+- Using your creativity, please reply to the following conversation naturally, as if you were a real person. 
+- You can respond in Vietnamese or English depending on the content of the chat and the person you are talking to. 
+- You can speak English if the name of the person you are talking to is not Vietnamese. 
+- Keep your responses concise if possible and avoid repetitive or mechanical replies. 
+- Respond as naturally and human-like as possible.
+- Respond to the point, especially the last message
+- Do not explain or add any details beyond the message in your content
+- You can introduce yourself when getting to know each other.
+- To make the conversation less boring, you can ask the other person some interesting questions.
+- IMPORTANT! The content you create for me is the content of the reply message.
+
+>> TYPE YOUR MESSAGE TO REPLY""")
+                
 
                 for _x in range(10):
                     try:
                         button = driver.find_element(By.CSS_SELECTOR, 'p[class="xat24cr xdj266r"]')
                         button.send_keys(" ")
-                        caption=model.generate_content(prompt_list).text
+                        caption = model.generate_content(prompt_list).text
                         driver.execute_script("arguments[0].click();", button)
                         time.sleep(2)
                         button.send_keys(remove_non_bmp_characters(replace_emoji_with_shortcut(caption) + "\n"))

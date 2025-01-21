@@ -9,6 +9,7 @@ import time
 import os
 import json
 import random
+from urllib.parse import urlparse
 
 cwd = os.getcwd()
 
@@ -26,12 +27,13 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
             "profile.default_content_setting_values.notifications": 1  # 1 allows notifications, 2 blocks
         }
         chrome_options.add_experimental_option("prefs", prefs)
-        #chrome_options.add_argument("--headless=new")  # Enable advanced headless mode
+        chrome_options.add_argument("--headless=new")  # Enable advanced headless mode
         chrome_options.add_argument("--disable-gpu")   # Disable GPU acceleration for compatibility
         chrome_options.add_argument("window-size=1920,1080")  # Set custom window size
         chrome_options.add_argument('--disable-blink-features=AutomationControlled')
         chrome_options.add_argument('--no-sandbox') 
         chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--lang=en')
         chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])  
         chrome_options.add_experimental_option('useAutomationExtension', False)
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -39,16 +41,20 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
         
         driver = webdriver.Chrome(options=chrome_options)
 
+        driver.execute_cdp_cmd("Emulation.setUserAgentOverride", {
+            "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36"
+        })
+
         driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
         actions = ActionChains(driver)
         
-        wait = WebDriverWait(driver, 10)
+        wait = WebDriverWait(driver, 20)
         
         def find_element_when_clickable(by, selector):
             return wait.until(EC.element_to_be_clickable((by, selector)))
 
-        driver.get("https://www.facebook.com/login")
+        driver.get("https://m.facebook.com/login")
         wait.until(
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
@@ -64,45 +70,40 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
         actions.move_to_element(password_input).send_keys(password).perform()
         
         time.sleep(random.randint(3,6))
-        button = find_element_when_clickable(By.CSS_SELECTOR, 'button[id="loginbutton"]')
+        button = find_element_when_clickable(By.XPATH, '//span[@data-bloks-name="bk.components.TextSpan" and contains(text(), "Log in")]')
         actions.move_to_element(button).click().perform()
         wait.until(
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
-        #input()
         time.sleep(5)
-        if driver.current_url.startswith("https://www.facebook.com/two_step_verification/"):
-            url_veri = driver.current_url
-            for i in range(10):
-                try:
-                    other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[role="button"]')
-                    actions.move_to_element(other_veri_btn).click().perform() # Click other verification method
-                    time.sleep(random.randint(5,8))
-                    other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[id=":r5:"]')
-                    actions.move_to_element(other_veri_btn).click().perform() # Click App Auth method
-                    time.sleep(random.randint(5,8))
-                    other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[class="x1ja2u2z x78zum5 x2lah0s x1n2onr6 xl56j7k x6s0dn4 xozqiw3 x1q0g3np x972fbf xcfux6l x1qhh985 xm0m39n x9f619 xtvsq51 xi112ho x17zwfj4 x585lrc x1403ito x1fq8qgq x1ghtduv x1oktzhs"]')
-                    actions.move_to_element(other_veri_btn).click().perform() # Click Continue
-                    time.sleep(random.randint(5,8))
-                    other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'input[type="text"]')
-                    actions.move_to_element(other_veri_btn).click().perform() # Click on input code
-                    time.sleep(random.randint(5,8))
-                    actions.move_to_element(other_veri_btn).send_keys(generate_otp(otp_secret)).perform() # Type in code on input
-                    time.sleep(random.randint(5,8))
-                    other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'div[class="x1ja2u2z x78zum5 x2lah0s x1n2onr6 xl56j7k x6s0dn4 xozqiw3 x1q0g3np x972fbf xcfux6l x1qhh985 xm0m39n x9f619 xtvsq51 xi112ho x17zwfj4 x585lrc x1403ito x1fq8qgq x1ghtduv x1oktzhs"]')
-                    actions.move_to_element(other_veri_btn).click().perform() # Click Confirmed
-                    break
-                except Exception as e:
-                    print(f"Try again {i}:", e)
-                    driver.get(url_veri)
-                    time.sleep(5)
-            
-        #input()
+        parsed_url = urlparse(driver.current_url)
+        base_url_with_path = parsed_url.netloc + parsed_url.path
         
+        if base_url_with_path == "m.facebook.com/login":
+            other_veri_btn = find_element_when_clickable(By.XPATH, '//span[@data-bloks-name="bk.components.TextSpan" and contains(text(), "Try another way")]')
+            actions.move_to_element(other_veri_btn).click().perform() # Click other verification method
+            time.sleep(random.randint(5,8))
+            other_veri_btn = find_element_when_clickable(By.XPATH, '//span[@data-bloks-name="bk.components.TextSpan" and contains(text(), "Authentication app")]')
+            actions.move_to_element(other_veri_btn).click().perform() # Click App Auth method
+            time.sleep(random.randint(5,8))
+            other_veri_btn = find_element_when_clickable(By.XPATH, '//span[@data-bloks-name="bk.components.TextSpan" and contains(text(), "Continue")]')
+            actions.move_to_element(other_veri_btn).click().perform() # Click Continue
+            time.sleep(random.randint(5,8))
+            other_veri_btn = find_element_when_clickable(By.XPATH, '//span[@data-bloks-name="bk.components.TextSpan" and contains(text(), "Code")]')
+            actions.move_to_element(other_veri_btn).click().perform() # Click on input code
+            time.sleep(random.randint(5,8))
+            actions.move_to_element(other_veri_btn).send_keys(generate_otp(otp_secret)).perform() # Type in code on input
+            time.sleep(random.randint(5,8))
+            other_veri_btn = find_element_when_clickable(By.XPATH, '//span[@data-bloks-name="bk.components.TextSpan" and contains(text(), "Continue")]')
+            actions.move_to_element(other_veri_btn).click().perform() # Click Confirmed
+
         wait.until(
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
         time.sleep(5)
+        driver.execute_cdp_cmd("Emulation.setUserAgentOverride", {
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+        })
         driver.get("https://www.facebook.com/profile.php")
 
         wait.until(

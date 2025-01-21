@@ -18,6 +18,8 @@ from io import BytesIO
 import requests
 import pytz
 from urllib.parse import urljoin
+from hashlib import md5
+from urllib.parse import urlparse
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -270,6 +272,15 @@ try:
                 driver.switch_to.window(chat_tab)
                 print("Tin nhắn mới từ " + who_chatted)
 
+                parsed_url = urlparse(driver.current_url)
+
+                # Remove the trailing slash from the path, if it exists
+                urlpath = parsed_url.path.rstrip("/")
+                
+                # Split the path and extract the ID
+                path_parts = urlpath.split("/")
+                message_id = path_parts[-1] if len(path_parts) > 1 else "0"
+
                 try:
                     msg_scroller = driver.find_element(By.CSS_SELECTOR, 'div[class="x78zum5 xdt5ytf x1iyjqo2 x6ikm8r x1odjw0f xish69e x16o0dkt"]')
                     for _x in range(30):
@@ -429,8 +440,13 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                             });
                         """, video_url)
                         video_data = base64.b64decode(video_data_base64)
+                        video_hashcode = md5(video_data).hexdigest()
+                        video_name = f"files/video-{message_id}-{video_hashcode}"
                         video_file = BytesIO(video_data)
-                        video_upload = genai.upload_file(path = video_file, mime_type = "video/mp4")
+                        try:
+                            video_upload = genai.get_file(video_name[:40])
+                        except Exception:
+                            video_upload = genai.upload_file(path = video_file, mime_type = "video/mp4", name = video_name[:40])
 
                         last_msg = {"message_type" : "video", "info" : {name : "send an video"}}
                         prompt_list.append(json.dumps(last_msg))

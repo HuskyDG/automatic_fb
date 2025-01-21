@@ -139,6 +139,9 @@ try:
 
     driver.switch_to.new_window('tab')
     profile_tab = driver.current_window_handle
+ 
+    #driver.switch_to.new_window('tab')
+    #worker_tab = driver.current_window_handle
     
     driver.switch_to.window(chat_tab)
     
@@ -401,6 +404,25 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                         prompt_list.append(json.dumps({"conversation_image": {name : "send an image"}}))
                         prompt_list.append(image)
                         
+                    except Exception:
+                        pass
+
+                    try:
+                        video_element = msg_element.find_element(By.CSS_SELECTOR, 'video')
+                        video_url = video_element.get_attribute("src")
+                        video_data = driver.execute_script("""
+                            const blobUrl = arguments[0];
+                            return fetch(blobUrl)
+                                .then(response => response.arrayBuffer())
+                                .then(buffer => Array.from(new Uint8Array(buffer)));
+                        """, video_url)
+
+                        video_file = BytesIO(video_data)
+
+                        video_upload = genai.upload_file(path = video_file, mime_type = "video/mp4")
+
+                        prompt_list.append(json.dumps({"conversation_video": {name : "send an video"}}))
+                        prompt_list.append(video_upload)
                     except Exception:
                         pass
 

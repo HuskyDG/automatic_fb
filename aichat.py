@@ -366,7 +366,7 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                     try:
                         timedate = msg_element.find_element(By.CSS_SELECTOR, 'span[class="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x676frb x1pg5gke xvq8zen xo1l8bm x12scifz"]')
                         last_msg = {"message_type" : "conversation_event", "info" : timedate.text}
-                        prompt_list.append(json.dumps(last_msg))
+                        prompt_list.append(json.dumps(last_msg, ensure_ascii=False))
                     except Exception:
                         pass
                         
@@ -418,7 +418,7 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                         image = Image.open(image_file)
                        
                         last_msg = {"message_type" : "image", "info" : {name : "send an image"}}
-                        prompt_list.append(json.dumps(last_msg))
+                        prompt_list.append(json.dumps(last_msg, ensure_ascii=False))
                         prompt_list.append(image)
                         
                     except Exception:
@@ -449,7 +449,7 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                             video_upload = genai.upload_file(path = video_file, mime_type = "video/mp4", name = video_name[:40])
 
                         last_msg = {"message_type" : "video", "info" : {name : "send an video"}}
-                        prompt_list.append(json.dumps(last_msg))
+                        prompt_list.append(json.dumps(last_msg, ensure_ascii=False))
                         prompt_list.append(video_upload)
                     except Exception:
                         pass
@@ -482,7 +482,7 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                         quotes_text = None
                     
                     last_msg = {"message_type" : mark, "info" : {name : msg}, "replied_to_message" : quotes_text }
-                    prompt_list.append(json.dumps(last_msg))
+                    prompt_list.append(json.dumps(last_msg, ensure_ascii=False))
 
                     try: 
                         react_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[height="16"][width="16"]')
@@ -493,7 +493,7 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                             emoji_info = f"The above message was reacted with following emojis: {emojis}"
                             
                             last_msg = {"message_type" : "reactions", "info" : emoji_info}
-                            prompt_list.append(json.dumps(last_msg))
+                            prompt_list.append(json.dumps(last_msg, ensure_ascii=False))
                             
                     except Exception:
                         pass
@@ -504,19 +504,18 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                 for prompt in prompt_list:
                     print(prompt)
                 prompt_list.insert(0, header_prompt)
-                prompt_list.append("""
+                prompt_list.append(f"""
 
 Note: 
-- Using your creativity, please reply to the following conversation naturally, as if you were a real person. 
-- You can respond in Vietnamese or English depending on the content of the chat and the person you are talking to. 
-- You can speak English if the name of the person you are talking to is not Vietnamese. 
-- Keep your responses concise if possible and avoid repetitive or mechanical replies. 
-- Respond as naturally and human-like as possible.
-- Respond to the point, especially the last message
-- Do not explain or add any details beyond the message in your content
-- You can introduce yourself when getting to know each other.
-- To make the conversation less boring, you can ask the other person some interesting questions.
-- IMPORTANT! The content you create for me is the content of the reply message.
+- Reply naturally and creatively, as if you were a real person.
+- Use Vietnamese or English depending on the conversation and the other person's name.
+- If the name is not Vietnamese, default to English.
+- Keep responses concise, relevant, and avoid repetition or robotic tone.
+- Stay focused on the last message in the conversation.
+- Avoid unnecessary explanations or details beyond the reply itself.
+- Feel free to introduce yourself when meeting someone new.
+- Make the chat engaging by asking interesting questions.
+- Provide only the response content without introductory phrases or multiple options.
 
 >> TYPE YOUR MESSAGE TO REPLY""")
                 

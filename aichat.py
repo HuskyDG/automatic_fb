@@ -234,6 +234,7 @@ try:
                 for digit in onetimecode:
                     actions.move_to_element(otc_input).send_keys(digit).perform()  # Send the digit to the input element
                     time.sleep(1)  # Wait for 1s before sending the next digit
+                time.sleep(5)
                 continue
             except Exception:
                 pass
@@ -338,6 +339,7 @@ try:
                 day_and_time = current_datetime.strftime("%A, %d %B %Y - %H:%M:%S")
                 
                 prompt_list = []
+                last_msg = {"message_type" : "none"}
 
                 header_prompt = f"""
 I am creating a chat bot / message response model and using your reply as a response. 
@@ -352,16 +354,19 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                 for msg_element in msg_elements:
                     try:
                         timedate = msg_element.find_element(By.CSS_SELECTOR, 'span[class="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x676frb x1pg5gke xvq8zen xo1l8bm x12scifz"]')
-                        prompt_list.append(json.dumps({"conversation_event" : timedate.text}))
+                        last_msg = {"message_type" : "conversation_event", "info" : timedate.text}
+                        prompt_list.append(json.dumps(last_msg))
                     except Exception:
                         pass
                         
                     # Finding name
                     try: 
                         msg_element.find_element(By.CSS_SELECTOR, 'div[class="html-div xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp x11i5rnm x12nagc x1mh8g0r x1yc453h x126k92a xyk4ms5"]').text
-                        name = "Your message"
+                        name = "your message"
+                        mark = "your_text_message"
                     except Exception:
                         name = None
+                        mark = "text_message"
 
                     if name == None:
                         try: 
@@ -401,7 +406,8 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                         # Open the image with PIL
                         image = Image.open(image_file)
                        
-                        prompt_list.append(json.dumps({"conversation_image": {name : "send an image"}}))
+                        last_msg = {"message_type" : "image", "info" : {name : "send an image"}}
+                        prompt_list.append(json.dumps(last_msg))
                         prompt_list.append(image)
                         
                     except Exception:
@@ -418,10 +424,10 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                         """, video_url)
 
                         video_file = BytesIO(video_data)
-
                         video_upload = genai.upload_file(path = video_file, mime_type = "video/mp4")
 
-                        prompt_list.append(json.dumps({"conversation_video": {name : "send an video"}}))
+                        last_msg = {"message_type" : "video", "info" : {name : "send an video"}}
+                        prompt_list.append(json.dumps(last_msg))
                         prompt_list.append(video_upload)
                     except Exception:
                         pass
@@ -453,9 +459,8 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                     except Exception:
                         quotes_text = None
                     
-                    prompt_list.append(json.dumps(
-                    {"conversation_message": {name : msg},
-                     "replied_to_message" : quotes_text }))
+                    last_msg = {"message_type" : mark, "info" : {name : msg}, "replied_to_message" : quotes_text }
+                    prompt_list.append(json.dumps(last_msg))
 
                     try: 
                         react_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[height="16"][width="16"]')
@@ -465,10 +470,14 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                                 emojis += react_element.get_attribute("alt")
                             emoji_info = f"The above message was reacted with following emojis: {emojis}"
                             
-                            prompt_list.append(json.dumps({"conversation_reactions" : emoji_info}))
+                            last_msg = {"message_type" : "reactions", "info" : emoji_info}
+                            prompt_list.append(json.dumps(last_msg))
                             
                     except Exception:
                         pass
+
+                if last_msg["message_type"] == "your_text_message" or last_msg["message_type"] == "reactions" or last_msg["message_type"] == "conversation_event":
+                    continue
 
                 for prompt in prompt_list:
                     print(prompt)

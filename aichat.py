@@ -107,6 +107,24 @@ def inject_reload(driver):
     """
     driver.execute_script(reload_script)
 
+def find_and_get_text(parent, find_by, find_selector):
+    try:
+        return parent.find_element(find_by, find_selector).text
+    except Exception:
+        return None
+
+def find_and_get_list_text(parent, find_by, find_selector):
+    myList = []
+    try:
+        for element in parent.find_elements(find_by, find_selector):
+            try:
+                myList.append(element.text)
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return myList
+
 try:
     # Set Chrome options
     chrome_options = Options()
@@ -194,6 +212,8 @@ try:
     driver.get("https://www.facebook.com/friends")
     wait_for_load(driver)
     time.sleep(2)
+
+    facebook_infos = {}
     
     while True:
         try:
@@ -258,19 +278,62 @@ try:
                 try:
                     profile_btn = driver.find_element(By.CSS_SELECTOR, 'a[class="x1i10hfl x1qjc9v5 xjbqb8w xjqpnuy xa49m3k xqeqjp1 x2hbi6w x13fuv20 xu3j5b3 x1q0q8m5 x26u7qi x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xdl72j9 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r x2lwn1j xeuugli xexx8yu x4uap5 x18d9i69 xkhd6sd x1n2onr6 x16tdsg8 x1hl2dhg xggy1nq x1ja2u2z x1t137rt x1o1ewxj x3x9cwd x1e5q0jg x13rtm0m x1q0g3np x87ps6o x1lku1pv x1rg5ohu x1a2a7pz xs83m0k"]')
                     profile_link = urljoin(driver.current_url, profile_btn.get_attribute("href"))
-                    
-                    driver.switch_to.window(profile_tab)
-                    driver.get(profile_link)
-                    
-                    wait_for_load(driver)
-    
-                    find_who_chatted = driver.find_elements(By.CSS_SELECTOR, 'h1[class^="html-h1 "]')
-                    who_chatted = find_who_chatted[-1].text
-                except Exception:
+
+                    facebook_info = facebook_infos.get(profile_link)
+                    if facebook_info == None:
+                        driver.switch_to.window(profile_tab)
+                        driver.get(profile_link)
+                        
+                        wait_for_load(driver)
+                        time.sleep(0.5)
+        
+                        find_who_chatted = driver.find_elements(By.CSS_SELECTOR, 'h1[class^="html-h1 "]')
+                        who_chatted = find_who_chatted[-1].text
+                        
+                        facebook_info = { "Facebook name" : who_chatted, "Facebook url" :  profile_link }
+                        
+                        # Loop through the profile sections
+                        for sk in [
+                            "?sk=about_work_and_education", 
+                            "?sk=about_places", 
+                            "?sk=about_contact_and_basic_info", 
+                            "?sk=about_family_and_relationships", 
+                            "?sk=about_details"
+                        ]:
+                            # Build the full URL for the profile section
+                            info_url = urljoin(profile_link, sk)
+                            driver.get(info_url)
+
+                            # Wait for the page to load
+                            wait_for_load(driver)
+                            #time.sleep(0.5)
+
+                            # Find the info elements
+                            info_elements = driver.find_elements(By.CSS_SELECTOR, 'div[class="xyamay9 xqmdsaz x1gan7if x1swvt13"] > div')
+
+                            # Loop through each info element
+                            for info_element in info_elements:
+                                title = find_and_get_text(info_element, By.CSS_SELECTOR, 'div[class="xieb3on x1gslohp"]')
+                                if title is not None:
+                                    detail = []
+
+                                    # Append the text lists to the detail array
+                                    detail.extend(find_and_get_list_text(info_element, By.CSS_SELECTOR, 'div[class="x1hq5gj4"]'))
+                                    detail.extend(find_and_get_list_text(info_element, By.CSS_SELECTOR, 'div[class="xat24cr"]'))
+
+                                    # Add title and details to the facebook_info dictionary
+                                    facebook_info[title] = detail
+                        
+                        facebook_infos[profile_link] = facebook_info
+                    else:
+                        who_chatted = facebook_info.get("Facebook name")
+                except Exception as e:
+                    print(e)
                     continue
                 
                 driver.switch_to.window(chat_tab)
                 print("Tin nhắn mới từ " + who_chatted)
+                print(json.dumps(facebook_info, ensure_ascii=False, indent=2))
 
                 parsed_url = urlparse(driver.current_url)
 
@@ -358,9 +421,13 @@ I am creating a chat bot / message response model and using your reply as a resp
 Pretending that you are me: {myname}
 {ai_prompt}
 
-Currently, it is {day_and_time}, you receives a message from "{who_chatted}". The Messenger conversation with "{who_chatted}" is as json here:
+Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Here is json information about "{who_chatted}":
+{json.dumps(facebook_info, ensure_ascii=False, indent=2)}
 
 """
+
+                
+                prompt_list.append(f'The Messenger conversation with "{who_chatted}" is as json here:')
 
                 for msg_element in msg_elements:
                     try:

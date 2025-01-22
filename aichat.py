@@ -399,28 +399,33 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". Th
                         pass
                     
                     try:
-                        image_element = msg_element.find_element(By.CSS_SELECTOR, 'img[class="xz74otr xmz0i5r x193iq5w"]')
-                        data_uri = image_element.get_attribute("src")
-                        
-                        if data_uri.startswith("data:image/jpeg;base64,"):
-                            # Extract the base64 string (remove the prefix)
-                            base64_str = data_uri.split(",")[1]
+                        image_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[class="xz74otr xmz0i5r x193iq5w"]')
+                        for image_element in image_elements:
+                            try:
+                                data_uri = image_element.get_attribute("src")
+                                
+                                if data_uri.startswith("data:image/jpeg;base64,"):
+                                    # Extract the base64 string (remove the prefix)
+                                    base64_str = data_uri.split(",")[1]
+                                    # Decode the base64 string into binary data
+                                    image_data = base64.b64decode(base64_str)
+                                else:
+                                    image_data = requests.get(data_uri).content
 
-                            # Decode the base64 string into binary data
-                            image_data = base64.b64decode(base64_str)
-
-                        else:
-                            image_data = requests.get(data_uri).content
-
-                        # Use BytesIO to create a file-like object for the image
-                        image_file = BytesIO(image_data)
-                        # Open the image with PIL
-                        image = Image.open(image_file)
-                       
-                        last_msg = {"message_type" : "image", "info" : {name : "send an image"}}
-                        prompt_list.append(json.dumps(last_msg, ensure_ascii=False))
-                        prompt_list.append(image)
-                        
+                                image_hashcode = md5(image_data).hexdigest()
+                                image_name = f"files/img-{message_id}-{image_hashcode}"
+                                # Use BytesIO to create a file-like object for the image
+                                image_file = BytesIO(image_data)
+                                try:
+                                    image_upload = genai.get_file(image_name[:40])
+                                except Exception:
+                                    image_upload = genai.upload_file(path = image_file, mime_type = "image/jpeg", name = image_name[:40])
+                               
+                                last_msg = {"message_type" : "image", "info" : {name : "send an image"}}
+                                prompt_list.append(json.dumps(last_msg, ensure_ascii=False))
+                                prompt_list.append(image_upload)
+                            except Exception:
+                                pass
                     except Exception:
                         pass
 

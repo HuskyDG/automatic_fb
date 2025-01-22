@@ -493,7 +493,7 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". He
                                 except Exception:
                                     image_upload = genai.upload_file(path = image_file, mime_type = "image/jpeg", name = image_name[:40])
                                
-                                last_msg = {"message_type" : "image", "info" : {name : "send an image"}, "replied_to_message" : quotes_text}
+                                last_msg = {"message_type" : "image", "info" : {name : "send an image"}, "mentioned_message" : quotes_text}
                                 prompt_list.append(json.dumps(last_msg, ensure_ascii=False))
                                 prompt_list.append(image_upload)
                             except Exception:
@@ -525,7 +525,7 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". He
                         except Exception:
                             video_upload = genai.upload_file(path = video_file, mime_type = "video/mp4", name = video_name[:40])
 
-                        last_msg = {"message_type" : "video", "info" : {name : "send an video"}, "replied_to_message" : quotes_text}
+                        last_msg = {"message_type" : "video", "info" : {name : "send an video"}, "mentioned_message" : quotes_text}
                         prompt_list.append(json.dumps(last_msg, ensure_ascii=False))
                         prompt_list.append(video_upload)
                     except Exception:
@@ -553,7 +553,7 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". He
                     if name == None:
                         name = "None"
                     
-                    last_msg = {"message_type" : mark, "info" : {name : msg}, "replied_to_message" : quotes_text }
+                    last_msg = {"message_type" : mark, "info" : {name : msg}, "mentioned_message" : quotes_text }
                     prompt_list.append(json.dumps(last_msg, ensure_ascii=False))
 
                     try: 

@@ -436,7 +436,12 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". He
                         prompt_list.append(json.dumps(last_msg, ensure_ascii=False))
                     except Exception:
                         pass
-                        
+
+                    try:
+                        quotes_text = msg_element.find_element(By.CSS_SELECTOR, 'div[class="xi81zsa x126k92a"]').text
+                    except Exception:
+                        quotes_text = None
+
                     # Finding name
                     try: 
                         msg_element.find_element(By.CSS_SELECTOR, 'div[class="html-div xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp x11i5rnm x12nagc x1mh8g0r x1yc453h x126k92a xyk4ms5"]').text
@@ -488,7 +493,7 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". He
                                 except Exception:
                                     image_upload = genai.upload_file(path = image_file, mime_type = "image/jpeg", name = image_name[:40])
                                
-                                last_msg = {"message_type" : "image", "info" : {name : "send an image"}}
+                                last_msg = {"message_type" : "image", "info" : {name : "send an image"}, "replied_to_message" : quotes_text}
                                 prompt_list.append(json.dumps(last_msg, ensure_ascii=False))
                                 prompt_list.append(image_upload)
                             except Exception:
@@ -520,7 +525,7 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". He
                         except Exception:
                             video_upload = genai.upload_file(path = video_file, mime_type = "video/mp4", name = video_name[:40])
 
-                        last_msg = {"message_type" : "video", "info" : {name : "send an video"}}
+                        last_msg = {"message_type" : "video", "info" : {name : "send an video"}, "replied_to_message" : quotes_text}
                         prompt_list.append(json.dumps(last_msg, ensure_ascii=False))
                         prompt_list.append(video_upload)
                     except Exception:
@@ -547,11 +552,6 @@ Currently, it is {day_and_time}, you receives a message from "{who_chatted}". He
                         continue
                     if name == None:
                         name = "None"
-
-                    try:
-                        quotes_text = msg_element.find_element(By.CSS_SELECTOR, 'div[class="xi81zsa x126k92a"]').text
-                    except Exception:
-                        quotes_text = None
                     
                     last_msg = {"message_type" : mark, "info" : {name : msg}, "replied_to_message" : quotes_text }
                     prompt_list.append(json.dumps(last_msg, ensure_ascii=False))

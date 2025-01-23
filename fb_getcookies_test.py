@@ -2,6 +2,7 @@ from fb_getcookies import get_fb_cookies
 import os
 import sys
 import json
+import time
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -25,4 +26,10 @@ if alt_account == None or alt_account == "":
 else:
     alt_account = int(alt_account)
 
-get_fb_cookies(username, password, otp_secret, alt_account)
+for i in range(5):
+    try:
+        get_fb_cookies(username, password, otp_secret, alt_account)
+        break
+    except Exception as e:
+        print(f"Lỗi:", e)
+        time.sleep(5)

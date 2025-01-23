@@ -77,7 +77,7 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
         )
         time.sleep(5)
         parsed_url = urlparse(driver.current_url)
-        base_url_with_path = parsed_url.netloc + parsed_url.path
+        base_url_with_path = parsed_url.netloc + parsed_url.path.rstrip("/")
         
         if base_url_with_path == "m.facebook.com/login":
             other_veri_btn = find_element_when_clickable(By.XPATH, '//span[@data-bloks-name="bk.components.TextSpan" and contains(text(), "Try another way")]')
@@ -127,9 +127,10 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
         time.sleep(3)
-        find_myname = driver.find_elements(By.CSS_SELECTOR, 'h1[class^="html-h1 "]')
-        myname = find_myname[-1].text
-        print(myname)
+        parsed_url = urlparse(driver.current_url)
+        base_url_with_path = parsed_url.netloc + parsed_url.path.rstrip("/")
+        if base_url_with_path == "www.facebook.com/login":
+            raise Exception("Lỗi đăng nhập")
 
         if finally_stop:
             input("Press Enter to extract the cookies")
@@ -137,6 +138,8 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
         f = open(filename, "w")
         json.dump(driver.get_cookies(), f)
         f.close()
+        
+        print("Đăng nhập thành công:", driver.current_url)
 
     finally:
         driver.quit()

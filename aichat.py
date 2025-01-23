@@ -125,6 +125,16 @@ def find_and_get_list_text(parent, find_by, find_selector):
         pass
     return myList
 
+def switch_to_mobile_view(driver):
+    driver.execute_cdp_cmd("Emulation.setUserAgentOverride", {
+        "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36"
+    })
+
+def switch_to_desktop_view(driver):
+    driver.execute_cdp_cmd("Emulation.setUserAgentOverride", {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+    })
+
 try:
     # Set Chrome options
     chrome_options = Options()
@@ -155,13 +165,17 @@ try:
     chat_tab = driver.current_window_handle
     
     driver.switch_to.new_window('tab')
+    driver.execute_cdp_cmd('Emulation.setTimezoneOverride', tz_params)
     friend_tab = driver.current_window_handle
 
     driver.switch_to.new_window('tab')
+    driver.execute_cdp_cmd('Emulation.setTimezoneOverride', tz_params)
     profile_tab = driver.current_window_handle
  
-    #driver.switch_to.new_window('tab')
-    #worker_tab = driver.current_window_handle
+    driver.switch_to.new_window('tab')
+    driver.execute_cdp_cmd('Emulation.setTimezoneOverride', tz_params)
+    switch_to_mobile_view(driver)
+    worker_tab = driver.current_window_handle
     
     driver.switch_to.window(chat_tab)
     
@@ -207,9 +221,14 @@ try:
     driver.get("https://www.facebook.com/messages/t/156025504001094")
     wait_for_load(driver)
     time.sleep(2)
-    
+
     driver.switch_to.window(friend_tab)
     driver.get("https://www.facebook.com/friends")
+    wait_for_load(driver)
+    time.sleep(2)
+
+    driver.switch_to.window(worker_tab)
+    driver.get("https://www.facebook.com/home.php")
     wait_for_load(driver)
     time.sleep(2)
 
@@ -244,6 +263,37 @@ try:
                     time.sleep(0.5)
             except Exception:
                 pass
+            driver.switch_to.window(worker_tab)
+            inject_reload(driver)
+            driver.execute_script("""
+                if (typeof window.executeLikes === 'undefined') {
+                    window.executeLikes = true;
+                    (async function randomClickDivs() {
+                        // Find all divs with the specific aria-label
+                        const divs = Array.from(document.querySelectorAll('div[aria-label*="like, double tap and hold for more reactions"]'));
+                        if (divs.length === 0) {
+                            console.log('No matching divs found.');
+                            return;
+                        }
+                        console.log(`Found ${divs.length} matching divs.`);
+
+                        // Shuffle the array to randomize the order
+                        const shuffledDivs = divs.sort(() => 0.5 - Math.random());
+
+                        // Select the first 5 divs from the shuffled array
+                        const selectedDivs = shuffledDivs.slice(0, 5);
+
+                        // Click each div with a 10-second delay
+                        for (let i = 0; i < selectedDivs.length; i++) {
+                            console.log(`Clicking div ${i + 1} of 5...`);
+                            selectedDivs[i].click();
+
+                            // Wait for 10 seconds before the next click
+                            await new Promise(resolve => setTimeout(resolve, 10000));
+                        }
+                    })();
+                }
+            """)
 
             driver.switch_to.window(chat_tab)
             inject_reload(driver)

@@ -26,10 +26,13 @@ if alt_account == None or alt_account == "":
 else:
     alt_account = int(alt_account)
 
+filename = "cookies.json"
 for i in range(5):
-    try:
-        get_fb_cookies(username, password, otp_secret, alt_account)
-        break
-    except Exception as e:
-        print(f"Lỗi:", e)
+    cookies = get_fb_cookies(username, password, otp_secret, alt_account)
+    if cookies == None:
         time.sleep(5)
+        continue
+    cookies_file = open(filename, "w")
+    json.dump(cookies, cookies_file)
+    cookies_file.close()
+    break

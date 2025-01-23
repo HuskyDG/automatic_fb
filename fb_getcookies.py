@@ -18,7 +18,8 @@ def generate_otp(secret_key):
     totp = pyotp.TOTP(secret_key)
     return totp.now()
 
-def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, finally_stop = False, filename = "cookies.json"):
+def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, finally_stop = False):
+    cookies = None
     try:
         # Set Chrome options
         chrome_options = Options()
@@ -134,12 +135,12 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, final
 
         if finally_stop:
             input("Press Enter to extract the cookies")
-        
-        f = open(filename, "w")
-        json.dump(driver.get_cookies(), f)
-        f.close()
-        
+        cookies = driver.get_cookies()
         print("Đăng nhập thành công:", driver.current_url)
-
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
     finally:
         driver.quit()
+        
+    return cookies

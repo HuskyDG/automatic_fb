@@ -57,7 +57,7 @@ jobs:
       - name: Login Facebook account
         if: ${{ github.event_name == 'schedule' }}
         run: |
-          python logininfo_unzip.py
+          python secrets/decrypt.py
           python fb_getcookies_test.py
         env:
           PYTHONUNBUFFERED: "1"
@@ -86,7 +86,6 @@ jobs:
       # Run the script
       - name: Run script
         run: |
-          python one-time-code_unzip.py
           python aichat_timeout.py
         env:
           PYTHONUNBUFFERED: "1"

@@ -8,7 +8,7 @@
 - `GENKEY`: Google developer API key để sử dụng Gemini
 - `PASSWORD`: Để giải mã file `one-time-code.zip` và `logininfo.zip`
 
-### Nội dung file nén
+### Nội dung file nén trong thư mục secrets
 - `one-time-code.zip` chứa `one-time-code.txt`. Nôi dung là mật mã 6 chữ để giải mã các cuộc trò truyện bị mã hóa
 - `logininfo.zip` chứa `logininfo.json` với nội dung:
 

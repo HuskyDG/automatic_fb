@@ -16,3 +16,4 @@ def decrypt_zip(filename, pwd):
 
 decrypt_zip(cwd + "/secrets/one-time-code.zip", password)
 decrypt_zip(cwd + "/secrets/logininfo.zip", password)
+decrypt_zip(cwd + "/secrets/traodoisub_fbconfig.zip", password)

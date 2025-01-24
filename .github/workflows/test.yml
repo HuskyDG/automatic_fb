@@ -22,8 +22,11 @@ on:
         default: "0"
         required: false
       ai_prompt:
-        description: "Input the AI behavior prompt (optional)"
+        description: "Input the personality prompt (optional)"
         required: false
+      gemini_key:
+        description: "Input the Gemini API Key (obtain from [https://aistudio.google.com/app/apikey])"
+        required: true
       cancel-workflow:
         description: "Cancel previous workflow runs (default true)"
         required: false
@@ -89,7 +92,7 @@ jobs:
           python aichat_timeout.py
         env:
           PYTHONUNBUFFERED: "1"
-          GENKEY: ${{ secrets.GENKEY }}
+          GENKEY: ${{ inputs.gemini_key || secrets.GENKEY }}
           AI_PROMPT: ${{ inputs.ai_prompt || '' }}
           PASSWORD: ${{ secrets.PASSWORD }}
           ONETIMECODE: ${{ inputs.one_time_code }}

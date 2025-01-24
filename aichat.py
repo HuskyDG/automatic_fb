@@ -270,7 +270,7 @@ try:
                     window.executeLikes = true;
                     (async function randomClickDivs() {
                         // Find all divs with the specific aria-label
-                        const divs = Array.from(document.querySelectorAll('div[aria-label*="like, double tap and hold for more reactions"]'));
+                        const divs = Array.from(document.querySelectorAll('div[aria-label*="like, double tap and hold for more reactions"]')).concat(Array.from(document.querySelectorAll('div[role="button"] > div[style="color:#1877f2;"]')));
                         if (divs.length === 0) {
                             console.log('No matching divs found.');
                             return;

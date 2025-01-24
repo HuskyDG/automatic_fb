@@ -1,8 +1,6 @@
-name: Run AI Chat on Messenger account
+name: Run AI Chat on Messenger account (manually run)
 
 on:
-  schedule:
-    - cron: "0 */5 * * *"
   workflow_dispatch:
     inputs:
       username:
@@ -27,14 +25,9 @@ on:
       gemini_key:
         description: "Input the Gemini API Key (obtain from [https://aistudio.google.com/app/apikey])"
         required: true
-      cancel-workflow:
-        description: "Cancel previous workflow runs (default true)"
-        required: false
-        default: "true"
-        type: boolean  # Chỉ định loại dữ liệu là boolean
 
 jobs:
-  run-tests:
+  run-aichat:
     runs-on: windows-latest
     timeout-minutes: 310
 
@@ -56,19 +49,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Run the script
       - name: Login Facebook account
-        if: ${{ github.event_name == 'schedule' }}
-        run: |
-          python secrets/decrypt.py
-          python fb_getcookies_test.py
-        env:
-          PYTHONUNBUFFERED: "1"
-          PASSWORD: ${{ secrets.PASSWORD }}
-          USE_ENV_SETUP: "false"
-
-      - name: Login Facebook account
-        if: ${{ github.event_name != 'schedule' }}
         run: |
           python fb_getcookies_test.py
         env:
@@ -79,20 +60,12 @@ jobs:
           OTP_SECRET: ${{ inputs.otp_secret || '' }}
           ATL_ACC: ${{ inputs.alt_account || '0' }}
 
-      # Conditionally cancel previous runs
-      - name: Cancel Previous Runs
-        if: ${{ github.event_name == 'schedule' || inputs.cancel-workflow == true }}
-        uses: styfle/cancel-workflow-action@0.12.1
-        with:
-          access_token: ${{ github.token }}
-
       # Run the script
       - name: Run script
         run: |
           python aichat_timeout.py
         env:
           PYTHONUNBUFFERED: "1"
-          GENKEY: ${{ inputs.gemini_key || secrets.GENKEY }}
+          GENKEY: ${{ inputs.gemini_key }}
           AI_PROMPT: ${{ inputs.ai_prompt || '' }}
-          PASSWORD: ${{ secrets.PASSWORD }}
           ONETIMECODE: ${{ inputs.one_time_code }}

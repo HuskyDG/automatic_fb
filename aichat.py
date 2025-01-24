@@ -95,17 +95,17 @@ def wait_for_load(driver):
 def remove_non_bmp_characters(input_string):
     return ''.join(c for c in input_string if ord(c) <= 0xFFFF)
     
-def inject_reload(driver):
+def inject_reload(driver, timedelay = 300000):
     # Insert JavaScript to reload the page after 5 minutes (300,000 ms)
     reload_script = """
             if (typeof window.reloadScheduled === 'undefined') {
                 window.reloadScheduled = true;
                 setTimeout(function() {
                     location.reload();
-                }, 300000);  // 5 minutes in milliseconds
+                }, arguments[0]);
             }
     """
-    driver.execute_script(reload_script)
+    driver.execute_script(reload_script, timedelay)
 
 def find_and_get_text(parent, find_by, find_selector):
     try:
@@ -264,7 +264,7 @@ try:
             except Exception:
                 pass
             driver.switch_to.window(worker_tab)
-            inject_reload(driver)
+            inject_reload(driver, 30*60*1000)
             driver.execute_script("""
                 if (typeof window.executeLikes === 'undefined') {
                     window.executeLikes = true;

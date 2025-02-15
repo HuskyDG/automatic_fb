@@ -51,6 +51,15 @@ def no_other_workflows_running(token, github_repo, workflow_id, run_id):
         return False, f"Failed to fetch workflow runs: {response.status_code} - {response.text}"
 
 import shutil
+import string
+import random
+
+def generate_hidden_branch():
+    randchars = []
+    characterList = string.ascii_letters + string.digits
+    for i in range(20):
+        randchars.append(random.choice(characterList))
+    return "hidden/" + "".join(randchars)
 
 def upload_file(token, repo, file, branch, rename = None, tempdir = "__tmp__"):
     # Create a temporary directory for the branch
@@ -113,7 +122,12 @@ def upload_file(token, repo, file, branch, rename = None, tempdir = "__tmp__"):
         if not os.path.exists(dir_of_dest):
             os.makedirs(dir_of_dest)
 
-    shutil.copy(file, dest)
+    if os.path.isdir(file):
+        if os.path.exists(dest):
+            shutil.rmtree(dest)
+        shutil.copytree(file, dest)
+    else:
+        shutil.copy(file, dest)
 
     # Stage the file for commit
     repo_instance.git.add(rename)
@@ -127,16 +141,38 @@ def upload_file(token, repo, file, branch, rename = None, tempdir = "__tmp__"):
 
     full_sha = repo_instance.head.object.hexsha
 
-    if branch.startswith("hidden:"):
+    if branch.startswith("hidden/"):
         origin.push(branch, delete=True)
         print(f"Branch {branch} deleted from remote repository.")
 
     return full_sha
 
+def github_url_of_raw(repo, file, branch):
+    return f'https://raw.githubusercontent.com/{repo}/{branch}/{file}'
+
+def get_raw_file(url, outfile):
+    # Ensure the output directory exists
+    outfile = os.path.abspath(outfile)
+    os.makedirs(os.path.dirname(outfile), exist_ok=True)
+    
+    # Send the GET request to GitHub API
+    response = requests.get(url)
+    
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Return the raw content of the file
+        with open(outfile, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:  # Write only non-empty chunks
+                    f.write(chunk)
+    else:
+        # Handle the error if the file is not found or any other issue
+        raise Exception(f"Failed to fetch file: {response.status_code} - {response.text}")
+
 def get_file(token, repo, file, branch, outfile):
     # GitHub API URL to get the raw file content
     url = f'https://api.github.com/repos/{repo}/contents/{file}?ref={branch}'
-    
+
     # Ensure the output directory exists
     outfile = os.path.abspath(outfile)
     os.makedirs(os.path.dirname(outfile), exist_ok=True)

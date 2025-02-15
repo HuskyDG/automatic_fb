@@ -11,3 +11,5 @@ self_facebook_info.bin
 /__tmp__
 cookies.json.enc
 logininfo.json.enc
+chat_histories.bin
+chat_histories.bin.enc

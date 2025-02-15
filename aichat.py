@@ -18,8 +18,8 @@ from selenium.webdriver.support import expected_conditions as EC  # For expected
 from selenium.common.exceptions import *  # For handling exceptions
 from selenium.webdriver.common.keys import Keys  # For keyboard actions
 import google.generativeai as genai  # For generative AI functionalities
-from pickle_utils import pickle_from_file, pickle_to_file  # For pickling data
-from github_utils import upload_file, get_file  # For GitHub file operations
+from pickle_utils import *  # For pickling data
+from github_utils import *  # For GitHub file operations
 from fb_getcookies import __chrome_driver__, is_facebook_logged_out, base_url_with_path  # For Facebook cookie handling
 from aichat_utils import *  # For custom utility functions
 
@@ -31,8 +31,10 @@ scoped_dir = os.getenv("SCPDIR")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN") # Pass GitHub Token
 GITHUB_REPO = os.getenv("GITHUB_REPO")   # Pass the repository (owner/repo)
 STORAGE_BRANCE = os.getenv("STORAGE_BRANCE")
+PASSWORD = os.getenv("PASSWORD", "")
+encrypt_key = generate_fernet_key(PASSWORD)
 
-if_running_on_github_workflows = (STORAGE_BRANCE is not None and STORAGE_BRANCE != "")
+if_running_on_github_workflows = (GITHUB_TOKEN is not None and GITHUB_TOKEN != "")
 
 f_intro_txt = "setup/introduction.txt"
 f_rules_txt = "setup/rules.txt"
@@ -132,11 +134,20 @@ try:
     myname = find_myname[-1].text
 
     f_self_facebook_info = "self_facebook_info.bin"
-    try:
-        if if_running_on_github_workflows:
+    f_chat_history = "chat_histories.bin"
+    if if_running_on_github_workflows:
+        try:
             get_file(GITHUB_TOKEN, GITHUB_REPO, f_self_facebook_info, STORAGE_BRANCE, f_self_facebook_info)
-    except Exception as e:
-        print(e)
+        except Exception as e:
+            print(e)
+        try:
+            # Get chat_histories
+            get_file(GITHUB_TOKEN, GITHUB_REPO, f_chat_history + ".enc", STORAGE_BRANCE, f_chat_history + ".enc")
+            decrypt_file(f_chat_history + ".enc", f_chat_history, encrypt_key)
+        except Exception as e:
+            print(e)
+
+    chat_histories = pickle_from_file(f_chat_history, {})
 
     self_facebook_info = pickle_from_file(f_self_facebook_info, { "Facebook name" : myname, "Facebook url" :  driver.current_url })
     
@@ -196,7 +207,6 @@ try:
         driver.get("https://www.facebook.com/friends")
         driver.switch_to.window(worker_tab)
         driver.get("https://www.facebook.com/home.php")
-    init_fb()
 
     f_facebook_infos = "facebook_infos.bin"
     try:
@@ -449,18 +459,10 @@ try:
                         continue
                     try:
                         msg_scroller = msg_table.find_element(By.CSS_SELECTOR, 'div[role="none"]')
-                        for _x in range(30):
-                            driver.execute_script("""
-                                var divs = document.querySelectorAll('div.x78zum5.xdt5ytf[data-virtualized="false"], div.x78zum5.xdt5ytf[data-virtualized="true"]');
-                                divs.forEach(function(div) {
-                                    var disabledDiv = document.createElement('disabled-div');
-                                    disabledDiv.innerHTML = div.innerHTML;  // Keep the content inside
-                                    div.parentNode.replaceChild(disabledDiv, div);  // Replace the div with the custom tag
-                                });
-                            """)
-                            # Scroll to the top of the message scroller
-                            driver.execute_script("arguments[0].scrollTop = 0;", msg_scroller)
-                            time.sleep(0.1)
+                        #for _x in range(30):
+                        #    # Scroll to the top of the message scroller
+                        #    driver.execute_script("arguments[0].scrollTop = 0;", msg_scroller)
+                        #    time.sleep(0.1)
                     except Exception:
                         msg_scroller = None
 
@@ -473,7 +475,10 @@ try:
                     day_and_time = current_datetime.strftime("%A, %d %B %Y - %H:%M:%S")
                     
                     prompt_list = []
-                    chat_history = []
+                        
+                    chat_history = chat_histories.get(message_id, [])
+                    print(json.dumps(chat_history, indent=4))
+                    chat_history_new = []
 
                     header_prompt = get_header_prompt(day_and_time, who_chatted, facebook_info)
 
@@ -486,10 +491,35 @@ try:
                         pass
 
                     print("Đang đọc tin nhắn...")
+                    for _x in range(30):
+                        stop = False
+                        for msg_element in reversed(msg_table.find_elements(By.CSS_SELECTOR, 'div[role="row"]:not([__read])')):
+                            try: 
+                                msg_element.find_element(By.CSS_SELECTOR, 'div[class="html-div xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp x11i5rnm x12nagc x1mh8g0r x1yc453h x126k92a xyk4ms5"]').text
+                                # our msg, at this point we should shop reading if we cached previous one
+                                if len(chat_history) > 0:
+                                    stop = True
+                            except:
+                                pass
+                        if stop:
+                            break
+                            
+                            driver.execute_script('arguments[0].setAttribute("__read", "yes");', msg_element)
+                        driver.execute_script("""
+                                var divs = document.querySelectorAll('div.x78zum5.xdt5ytf[data-virtualized="false"], div.x78zum5.xdt5ytf[data-virtualized="true"]');
+                                divs.forEach(function(div) {
+                                    var disabledDiv = document.createElement('disabled-div');
+                                    disabledDiv.innerHTML = div.innerHTML;  // Keep the content inside
+                                    div.parentNode.replaceChild(disabledDiv, div);  // Replace the div with the custom tag
+                                });
+                            """)
+                        driver.execute_script("arguments[0].scrollTop = 0;", msg_scroller)
+                        time.sleep(0.1)
+
                     for msg_element in reversed(msg_table.find_elements(By.CSS_SELECTOR, 'div[role="row"]')):
                         try:
                             timedate = msg_element.find_element(By.CSS_SELECTOR, 'span[class="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x676frb x1pg5gke xvq8zen xo1l8bm x12scifz"]')
-                            chat_history.insert(0, {"message_type" : "conversation_event", "info" : timedate.text})
+                            chat_history_new.insert(0, {"message_type" : "conversation_event", "info" : timedate.text})
                         except Exception:
                             pass
 
@@ -499,8 +529,10 @@ try:
                             quotes_text = None
 
                         # Finding name
+                        stop = False
                         try: 
                             msg_element.find_element(By.CSS_SELECTOR, 'div[class="html-div xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp x11i5rnm x12nagc x1mh8g0r x1yc453h x126k92a xyk4ms5"]').text
+                            break
                             name = myname
                             mark = "your_text_message"
                         except Exception:
@@ -538,7 +570,7 @@ try:
                             for image_element in image_elements:
                                 try:
                                     data_uri = image_element.get_attribute("src")
-                                    
+                                    _url = None
                                     if data_uri.startswith("data:image/jpeg;base64,"):
                                         # Extract the base64 string (remove the prefix)
                                         base64_str = data_uri.split(",")[1]
@@ -546,6 +578,7 @@ try:
                                         image_data = base64.b64decode(base64_str)
                                     else:
                                         image_data = requests.get(data_uri).content
+                                        _url = data_uri
 
                                     image_hashcode = md5(image_data).hexdigest()
                                     image_name = f"files/img-{message_id}-{image_hashcode}"
@@ -553,13 +586,9 @@ try:
                                     os.makedirs(os.path.dirname(image_name), exist_ok=True)
                                     # Use BytesIO to create a file-like object for the image
                                     image_file = BytesIO(image_data)
-                                    bytesio_to_file(image_file, image_name + ".jpg")
-                                    try:
-                                        genai.get_file(image_name)
-                                    except Exception:
-                                        genai.upload_file(path = image_file, mime_type = "image/jpeg", name = image_name)
+                                    bytesio_to_file(image_file, image_name)
                                    
-                                    chat_history.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send image", "file_name" : image_name }, "mentioned_message" : quotes_text})
+                                    chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send image", "file_name" : image_name, "mime_type" : "image/jpeg" , "url" : _url }, "mentioned_message" : quotes_text})
                                 except Exception:
                                     pass
                         except Exception:
@@ -574,13 +603,9 @@ try:
                             video_name = video_name[:40]
                             os.makedirs(os.path.dirname(video_name), exist_ok=True)
                             video_file = BytesIO(video_data)
-                            bytesio_to_file(video_file, video_name + ".mp4")
-                            try:
-                                genai.get_file(video_name)
-                            except Exception:
-                                genai.upload_file(path = video_file, mime_type = "video/mp4", name = video_name)
+                            bytesio_to_file(video_file, video_name)
 
-                            chat_history.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send video", "file_name" : video_name}, "mentioned_message" : quotes_text})
+                            chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send video", "file_name" : video_name, "mime_type" : "video/mp4", "url" : None }, "mentioned_message" : quotes_text})
                         except Exception:
                             pass
 
@@ -606,7 +631,7 @@ try:
                         if name == None:
                             name = "None"
                         
-                        chat_history.insert(0, {"message_type" : mark, "info" : {"name" : name, "msg" : msg}, "mentioned_message" : quotes_text })
+                        chat_history_new.insert(0, {"message_type" : mark, "info" : {"name" : name, "msg" : msg}, "mentioned_message" : quotes_text })
 
                         try: 
                             react_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[height="16"][width="16"]')
@@ -616,12 +641,14 @@ try:
                                     emojis += react_element.get_attribute("alt")
                                 emoji_info = f"The above message was reacted with following emojis: {emojis}"
                                 
-                                chat_history.insert(0, {"message_type" : "reactions", "info" : emoji_info})
+                                chat_history_new.insert(0, {"message_type" : "reactions", "info" : emoji_info})
                                 
                         except Exception:
                             pass
 
                     print("Đã đọc xong!")
+
+                    chat_history.extend(chat_history_new)
 
                     if len(chat_history) <= 0:
                         continue
@@ -634,7 +661,18 @@ try:
                         prompt_list.append(json.dumps(final_last_msg, ensure_ascii=False))
                         if msg["message_type"] == "file":
                             file_name = msg["info"]["file_name"]
-                            prompt_list.append(genai.get_file(file_name))
+                            mime_type = msg["info"]["mime_type"]
+                            try:
+                                file_upload = genai.get_file(file_name)
+                            except Exception:
+                                try:
+                                    if msg["info"]["url"] is not None:
+                                        get_raw_file(msg["info"]["url"], msg["info"]["file_name"])
+                                    file_upload = genai.upload_file(path = file_name, mime_type = mime_type, name = file_name)
+                                except Exception as e:
+                                    print(e)
+                                    continue
+                            prompt_list.append(file_upload)
                         
                     for prompt in prompt_list:
                         print(prompt)
@@ -664,6 +702,7 @@ try:
                             button.send_keys(remove_non_bmp_characters(replace_emoji_with_shortcut(caption) + "\n"))
 
                             print("AI Trả lời:", caption)
+                            chat_history.append({"message_type" : "your_text_message", "info" : {"name" : myname, "msg" : caption}, "mentioned_message" : None })
                             time.sleep(2)
 
                             break
@@ -674,10 +713,23 @@ try:
                             print(e)
                             time.sleep(2)
                             continue
+                    chat_histories[message_id] = chat_history
         except Exception as e:
             print(e)
+
     if if_running_on_github_workflows:
         upload_file(GITHUB_TOKEN, GITHUB_REPO, f_facebook_infos, STORAGE_BRANCE)
+        if os.path.exists("files"):
+            branch = upload_file(GITHUB_TOKEN, GITHUB_REPO, "files", generate_hidden_branch())
+            for msg_id, chat_history in chat_histories.items():
+                for msg in chat_history:
+                    if msg["message_type"] == "file" and msg["info"]["url"] == None:
+                        # Update url of file
+                        msg["info"]["url"] = f'https://raw.githubusercontent.com/{GITHUB_REPO}/{branch}/{msg["info"]["file_name"]}'
+        # Backup chat_histories
+        pickle_to_file(f_chat_history + ".enc", chat_histories, encrypt_key)
+        upload_file(GITHUB_TOKEN, GITHUB_REPO, f_chat_history + ".enc", STORAGE_BRANCE)
+ 
 finally:
     driver.quit()
     

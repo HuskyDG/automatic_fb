@@ -16,7 +16,7 @@ cwd = os.getcwd()
 
 import pyotp
 def generate_otp(secret_key):
-    totp = pyotp.TOTP(secret_key)
+    totp = pyotp.TOTP(secret_key.replace(" ",""))
     return totp.now()
 
 def base_url_with_path(url):

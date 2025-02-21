@@ -666,7 +666,8 @@ try:
                                 try:
                                     file_element = msg_element.find_element(By.CSS_SELECTOR, 'a[download]')
                                     file_url = file_element.get_attribute("href")
-                                    file_down_name = file_element.get_attribute("download")
+                                    parsed_url = urlparse(file_url)
+                                    file_down_name = parsed_url.path.rstrip("/").split("/")[-1]
                                     file_ext, mime_type = get_mine_type(file_down_name)
                                     if check_supported_file(mime_type):
                                         file_data = get_file_data(driver, file_url)

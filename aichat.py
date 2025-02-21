@@ -846,6 +846,7 @@ try:
                                     if caption is None and not is_command_msg:
                                         response = model.generate_content(prompt_list)
                                         if not response.candidates:
+                                            chat_history = [{"message_type" : "summary_old_chat", "info" : "The previous conversation has been deleted"}]
                                             caption = "(y)"
                                         else:
                                             caption = response.text

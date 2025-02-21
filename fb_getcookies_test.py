@@ -22,6 +22,7 @@ f_rules_txt = "setup/rules.txt"
 
 cookies_text = None
 alt_cookies_text = None
+use_backup = True
 
 if os.getenv("USE_ENV_SETUP") == "true":
 
@@ -41,9 +42,12 @@ if os.getenv("USE_ENV_SETUP") == "true":
     alt_cookies_text = login_info.get("alt_cookies_text", None)
     login_info["alt_cookies_text"] = None
 
-    with open(f_login_info, "w") as f:
-        json.dump(login_info, f)
-else:
+    if login_info.get("username", None):
+        with open(f_login_info, "w") as f:
+            json.dump(login_info, f)
+        use_backup = False
+
+if use_backup:
     if if_running_on_github_workflows:
         try:
             # Download the encrypted file

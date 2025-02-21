@@ -856,7 +856,10 @@ try:
                                     if caption is not None and not is_command_msg:
                                         img_search = {}
                                         reply_msg, img_search["on"] = extract_keywords(r'\[image\](.*?)\[/image\]', caption)
-                                        reply_msg, img_search["off"] = extract_keywords(r'\[adultimg\](.*?)\[/adultimg\]', reply_msg)
+                                        if work_jobs["aichat"] == "devmode":
+                                            reply_msg, img_search["off"] = extract_keywords(r'\[adultimg\](.*?)\[/adultimg\]', reply_msg)
+                                        else:
+                                            reply_msg, _ = extract_keywords(r'\[adultimg\](.*?)\[/adultimg\]', reply_msg)
                                         reply_msg, bot_commands = extract_keywords(r'\[cmd\](.*?)\[/cmd\]', reply_msg)
 
                                         print_with_time("AI Trả lời:", caption)

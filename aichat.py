@@ -205,6 +205,7 @@ try:
     instruction = get_instructions_prompt(myname, ai_prompt, self_facebook_info, rules_prompt, gemini_dev_mode)
     # Setup persona instruction
     genai.configure(api_key=genai_key)
+    existing_files = {f.name: f for f in genai.list_files()}
     model = genai.GenerativeModel(
         model_name="gemini-2.0-flash",
         system_instruction=instruction,  # Your overall guidance to the model
@@ -503,13 +504,16 @@ try:
                                         file_name = msg["info"]["file_name"]
                                         mime_type = msg["info"]["mime_type"]
                                         try:
-                                            file_upload = genai.get_file(file_name)
+                                            file_upload = existing_files[file_name] if file_name in existing_files else genai.get_file(file_name)
                                         except Exception:
                                             try:
-                                                if msg["info"]["url"] is not None:
+                                                if msg["info"].get("url", None) is not None:
                                                     get_raw_file(msg["info"]["url"], msg["info"]["file_name"])
                                                 file_upload = genai.upload_file(path = file_name, mime_type = mime_type, name = file_name)
+                                                existing_files[file_name] = file_upload
+                                                continue
                                             except Exception as e:
+                                                result.append(f"{file_name} cannot be loaded")
                                                 print_with_time(e)
                                                 continue
                                         result.append(file_upload)

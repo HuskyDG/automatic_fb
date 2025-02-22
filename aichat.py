@@ -545,7 +545,11 @@ try:
                             max_file = 10
                             num_file = 0
                             reset_regex = work_jobs.get("aichat_resetat", None)
-                            reset_with = work_jobs.get("aichat_resetwith", None)
+                            reset_msg = work_jobs.get("aichat_resetmsg", None)
+                            stop_regex = work_jobs.get("aichat_stopat", None)
+                            stop_msg = work_jobs.get("aichat_stopmsg", None)
+                            start_regex = work_jobs.get("aichat_startat", None)
+                            start_msg = work_jobs.get("aichat_startmsg", None)
 
                             for _x in range(3):
                                 stop = False
@@ -777,8 +781,18 @@ try:
                                 if msg["message_type"] == "text_message":
                                     if is_cmd(msg["info"]["msg"]):
                                         command_result += parse_and_execute(msg["info"]["msg"]) + "\n"
-                                    elif reset_regex and re.search(reset_regex, msg["info"]["msg"]):
+                                    if reset_regex and re.search(reset_regex, msg["info"]["msg"]):
                                         reset_chat("New chat")
+                                        if reset_msg:
+                                            command_result += reset_msg + "\n"
+                                    if stop_regex and re.search(stop_regex, msg["info"]["msg"]):
+                                        mute_chat("true")
+                                        if stop_msg:
+                                            command_result += stop_msg + "\n"
+                                    if start_regex and re.search(start_regex, msg["info"]["msg"]):
+                                        mute_chat("false")
+                                        if start_msg:
+                                            command_result += start_msg + "\n"
                                     
 
                             if len(chat_history) > 200:

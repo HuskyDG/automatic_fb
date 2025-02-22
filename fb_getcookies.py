@@ -125,7 +125,7 @@ def check_cookies(filename=None):
     try:
         cookies = None
         if filename:
-            with open(filename, "r") as f:
+            with open(filename, "r", encoding='utf-8') as f:
                 cookies = json.load(f)
         return check_cookies_(cookies), cookies
     except Exception as e:

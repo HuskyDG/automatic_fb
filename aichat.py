@@ -105,18 +105,18 @@ try:
     print_with_time("Đang tải dữ liệu từ cookies")
     
     try:
-        with open("cookies.json", "r") as f:
+        with open("cookies.json", "r", encoding='utf-8') as f:
             cache_fb = json.load(f)
     except Exception:
         cache_fb = []    
     try:
-        with open("cookies_bak.json", "r") as f:
+        with open("cookies_bak.json", "r", encoding='utf-8') as f:
             bak_cache_fb = json.load(f)
     except Exception:
         bak_cache_fb = None
 
     try:
-        with open("logininfo.json", "r") as f:
+        with open("logininfo.json", "r", encoding='utf-8') as f:
             login_info = json.load(f)
             onetimecode = login_info.get("onetimecode", "")
             work_jobs = parse_opts_string(login_info.get("work_jobs", "aichat,friends"))
@@ -258,7 +258,7 @@ try:
                 else:
                     print_with_time("Tài khoản bị đăng xuất")
                     break
-            with open("exitnow.txt", "r") as file:
+            with open("exitnow.txt", "r", encoding='utf-8') as file:
                 content = file.read().strip()  # Read and strip any whitespace/newline
                 if content == "1":
                     break
@@ -545,6 +545,7 @@ try:
                             max_file = 10
                             num_file = 0
                             reset_regex = work_jobs.get("aichat_resetat", None)
+                            reset_with = work_jobs.get("aichat_resetwith", None)
 
                             for _x in range(3):
                                 stop = False

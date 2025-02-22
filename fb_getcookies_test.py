@@ -59,7 +59,7 @@ if use_backup:
         except Exception as e:
             print(e)
 
-    with open(f_login_info, "r") as f:
+    with open(f_login_info, "r", encoding='utf-8') as f:
         login_info = json.load(f)
 
 ai_prompt = login_info.get("ai_prompt", None)

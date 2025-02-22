@@ -30,7 +30,7 @@ if os.getenv("USE_ENV_SETUP") == "true":
     event_path = os.getenv('GITHUB_EVENT_PATH')
 
     # Read the event data from the file
-    with open(event_path, 'r') as f:
+    with open(event_path, 'r', encoding='utf-8') as f:
         event_data = json.load(f)
 
     # Extract the inputs from the event payload

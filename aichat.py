@@ -556,7 +556,7 @@ try:
 
                             command_result = ""
                             reset = False
-                            should_not_chat = chat_histories["status"].get(message_id, True) == False
+                            should_not_chat = chat_histories["status"].get(message_id, True) == False or chat_histories["status"].get(facebook_id, True) == False
                             max_video = 10
                             num_video = 0
                             max_file = 10
@@ -643,6 +643,7 @@ try:
                                     mentioned_to_me = msg_frame.find_elements(By.CSS_SELECTOR, f'a[href="https://www.facebook.com/{self_fbid}/"]')
                                     if len(mentioned_to_me) > 0:
                                         chat_histories["status"][message_id] = True
+                                        chat_histories["status"][facebook_id] = True
                                         should_not_chat = False
                                         chat_history.insert(0, {"message_type" : "new_chat", "info" : "You are mentioned in chat"})
                                 except Exception:
@@ -760,18 +761,29 @@ try:
                                 global should_not_chat
                                 if mode == "true" or mode == "1":
                                     chat_histories["status"][message_id] = False
+                                    chat_histories["status"][facebook_id] = False
                                     should_not_chat = True
                                     return f'Bot has been muted'
                                 if mode == "false" or mode == "0":
                                     chat_histories["status"][message_id] = True
+                                    chat_histories["status"][facebook_id] = True
                                     return f'Bot has been unmuted'
                                 return f'Unknown mute mode! Use "1" to mute the bot or "0" to unmute the bot.'
+
+                            def mute_by_id(chatid):
+                                chat_histories["status"][chatid] = False
+                                return f"Bot is muted in chat with id {chatid}"
+
+                            def unmute_by_id(chatid):
+                                chat_histories["status"][chatid] = True
+                                return f"Bot is unmuted in chat with id {chatid}"
 
                             # Dictionary mapping arg1 to functions
                             func = {                    
                                 "totp": totp_cmd,
                                 "reset": reset_chat,
-                                "mute" : mute_chat,
+                                "mute" : mute_by_id,
+                                "unmute" : mute_by_id,
                             }
 
                             def parse_and_execute(command):
@@ -912,6 +924,7 @@ try:
                                         print_with_time("AI Trả lời:", caption)
                                         if is_group_chat and "bye" in bot_commands and "aichat_nobye" not in work_jobs:
                                             chat_histories["status"][message_id] = False
+                                            chat_histories["status"][facebok_id] = False
                                         for adult, img_keywords in img_search.items():
                                             for img_keyword in img_keywords:
                                                 try:

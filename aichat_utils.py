@@ -152,15 +152,6 @@ import pyotp
 def totp_cmd(secret):
     return pyotp.TOTP(secret).now()
 
-def parse_opts_string(input_str):
-    result = {}
-    for item in input_str.split(','):
-        key_value = item.split('=', 1)  # Split at the first '=' if it exists
-        key = key_value[0].strip()  # Strip any whitespace around the key
-        value = key_value[1].strip() if len(key_value) > 1 else True  # Strip and assign value or set True
-        result[key] = value
-    return result
-
 def get_file_data(driver, url):
     base64_data = driver.execute_script("""
         const blobUrl = arguments[0];
@@ -236,6 +227,26 @@ def drop_image(driver, element, image_bytesio):
     driver.execute_script(js_script, base64_image, element)
 
 import re
+
+def parse_opts_string(input_str):
+    result = {}
+    
+    # Split by ',' but ignore '\,'
+    items = re.split(r'(?<!\\),', input_str)
+    
+    for item in items:
+        # Split by '=' but ignore '\='
+        key_value = re.split(r'(?<!\\)=', item, 1)
+        key = key_value[0].replace(r'\,', ',').replace(r'\=', '=').strip()  # Unescape
+        value = (
+            key_value[1].replace(r'\,', ',').replace(r'\=', '=').strip()
+            if len(key_value) > 1 else True
+        )  # If no '=', set value as True
+        
+        result[key] = value
+    
+    return result
+
 import json
 def extract_json_from_markdown(markdown_text):
     """Extracts the first JSON code block from a markdown string."""

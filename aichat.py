@@ -9,6 +9,7 @@ from io import BytesIO  # For handling byte streams
 import requests  # For making HTTP requests
 from urllib.parse import urljoin, urlparse  # For URL manipulation
 from hashlib import md5  # For hashing
+import re
 from selenium import webdriver  # For web automation
 from selenium.webdriver.common.by import By  # For locating elements
 from selenium.webdriver.chrome.service import Service  # For Chrome service
@@ -543,6 +544,7 @@ try:
                             num_video = 0
                             max_file = 10
                             num_file = 0
+                            reset_regex = work_jobs.get("aichat_resetat", None)
 
                             for _x in range(3):
                                 stop = False
@@ -749,6 +751,8 @@ try:
                             }
 
                             def parse_and_execute(command):
+                                if "aichat_nocmd" in work_jobs:
+                                    return "?"
                                 # Parse the command
                                 args = shlex.split(command)
                                 
@@ -769,8 +773,11 @@ try:
                                     return f"Unknown command: {arg1}"
 
                             for msg in chat_history_new:
-                                if msg["message_type"] == "text_message" and is_cmd(msg["info"]["msg"]):
-                                    command_result += parse_and_execute(msg["info"]["msg"]) + "\n"
+                                if msg["message_type"] == "text_message":
+                                    if is_cmd(msg["info"]["msg"]):
+                                        command_result += parse_and_execute(msg["info"]["msg"]) + "\n"
+                                    elif reset_regex and re.search(reset_regex, msg["info"]["msg"]):
+                                        reset_chat("New chat")
                                     
 
                             if len(chat_history) > 200:

@@ -869,7 +869,7 @@ try:
                                         reply_msg, bot_commands = extract_keywords(r'\[cmd\](.*?)\[/cmd\]', reply_msg)
 
                                         print_with_time("AI Trả lời:", caption)
-                                        if "bye" in bot_commands:
+                                        if "bye" in bot_commands and "aichat_nobye" not in work_jobs:
                                             chat_histories["status"][message_id] = False
                                         for adult, img_keywords in img_search.items():
                                             for img_keyword in img_keywords:

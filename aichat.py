@@ -328,6 +328,7 @@ try:
             if "aichat" in work_jobs:
                 driver.switch_to.window(chat_tab)
                 if base_url_with_path(driver.current_url) != "www.facebook.com/messages/new" or (int(time.time()) - last_reload_ts) > 60*5:
+                    print_with_time("Tải lại trang messenger...")
                     driver.get("https://www.facebook.com/messages/new")
                     last_reload_ts = int(time.time())
                 try:
@@ -352,6 +353,10 @@ try:
 
                 # find all unread single chats not group (span[class="x6s0dn4 xzolkzo x12go9s9 x1rnf11y xprq8jg x9f619 x3nfvp2 xl56j7k x1spa7qu x1kpxq89 xsmyaan"])
                 chat_btns = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"]')
+                pressed_chat = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"][aria-current="page"]')
+                if len(pressed_chat) > 0: # There should be no chat is pressed
+                    last_reload_ts = 0
+                    continue
                 chat_list = []
                 for chat_btn in chat_btns:
                     #print_with_time(chat_btn.text)

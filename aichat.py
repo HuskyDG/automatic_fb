@@ -327,7 +327,7 @@ try:
 
             if "aichat" in work_jobs:
                 driver.switch_to.window(chat_tab)
-                if base_url_with_path(driver.current_url) != "www.facebook.com/messages/new" or (int(time.time()) - last_reload_ts) > 60*5:
+                if base_url_with_path(driver.current_url) != "www.facebook.com/messages/new" or (int(time.time()) - last_reload_ts) > 60*10:
                     print_with_time("Tải lại trang messenger...")
                     driver.get("https://www.facebook.com/messages/new")
                     last_reload_ts = int(time.time())

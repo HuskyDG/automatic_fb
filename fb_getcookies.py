@@ -11,6 +11,13 @@ import json
 import random
 from urllib.parse import urlparse
 from fbparser import get_facebook_profile_url
+import re
+
+def hide_email(email):
+    match = re.match(r'(\w)(\w+)(\w)(@.+)(\.\w+)', email)
+    if match:
+        return f"{match.group(1)}***{match.group(3)}{match.group(4)[0]}@***{match.group(5)}"
+    return email  # Return original if it doesn't match
 
 cwd = os.getcwd()
 
@@ -182,7 +189,7 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, cooki
             (By.CSS_SELECTOR, 'button[type="submit"]')
         ])
         actions.move_to_element(button).click().perform()
-        print(f"{username}: Đang đăng nhập...")
+        print(f"{hide_email(username)}: Đang đăng nhập...")
         time.sleep(1)
         wait.until(
             lambda d: d.execute_script("return document.readyState") == "complete"
@@ -193,7 +200,7 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, cooki
         print(_url)
         if  (_url == "www.facebook.com/two_step_verification/two_factor" or 
             _url == "www.facebook.com/auth_platform/afad"):
-            print(f"{username}: Đang chờ Xác minh đăng nhập thủ công. Hãy phê duyệt từ thiết bị khác trong vòng 20 giây...")
+            print(f"{hide_email(username)}: Đang chờ Xác minh đăng nhập thủ công. Hãy phê duyệt từ thiết bị khác trong vòng 20 giây...")
             for i in range(20):
                 _url = base_url_with_path(driver.current_url)
                 if  (_url == "www.facebook.com/two_step_verification/two_factor" or 
@@ -205,39 +212,39 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, cooki
         if  (_url == "www.facebook.com/two_step_verification/two_factor" or 
             _url == "www.facebook.com/auth_platform/afad"):
             try:
-                print(f"{username}: Chưa phê duyệt đang nhập. Đang tiến hành Xác minh đăng nhập 2 bước tự động với OTP")
+                print(f"{hide_email(username)}: Chưa phê duyệt đang nhập. Đang tiến hành Xác minh đăng nhập 2 bước tự động với OTP")
                 other_veri_btn = find_element_when_clickable_in_list([
                     (By.XPATH, '//span[contains(text(), "Thử cách khác")]'),
                     (By.XPATH, '//span[contains(text(), "Try another way")]')
                     ])
-                print(f"{username}: Nhấn thay đổi phương thức xác thực")
+                print(f"{hide_email(username)}: Nhấn thay đổi phương thức xác thực")
                 actions.move_to_element(other_veri_btn).click().perform() # Click other verification method
                 time.sleep(random.randint(5,8))
                 other_veri_btn = find_element_when_clickable_in_list([
                     (By.XPATH, '//div[contains(text(), "Ứng dụng xác thực")]'),
                     (By.XPATH, '//div[contains(text(), "Authentication app")]')
                     ])
-                print(f"{username}: Chọn xác thực bằng mã OTP từ ứng dụng xác thực")
+                print(f"{hide_email(username)}: Chọn xác thực bằng mã OTP từ ứng dụng xác thực")
                 actions.move_to_element(other_veri_btn).click().perform() # Click App Auth method
                 time.sleep(random.randint(5,8))
                 other_veri_btn = find_element_when_clickable_in_list([
                     (By.XPATH, '//span[contains(text(), "Tiếp tục")]'),
                     (By.XPATH, '//span[contains(text(), "Continue")]')
                     ])
-                print(f"{username}: Nhấn vào nút Tiếp tục")
+                print(f"{hide_email(username)}: Nhấn vào nút Tiếp tục")
                 actions.move_to_element(other_veri_btn).click().perform() # Click Continue
                 time.sleep(random.randint(5,8))
                 other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'input[type="text"]')
                 actions.move_to_element(other_veri_btn).click().perform() # Click on input code
                 time.sleep(random.randint(5,8))
-                print(f"{username}: Đã nhập mã OTP")
+                print(f"{hide_email(username)}: Đã nhập mã OTP")
                 actions.move_to_element(other_veri_btn).send_keys(generate_otp(otp_secret)).perform() # Type in code on input
                 time.sleep(random.randint(5,8))
                 other_veri_btn = find_element_when_clickable_in_list([
                     (By.XPATH, '//span[contains(text(), "Tiếp tục")]'),
                     (By.XPATH, '//span[contains(text(), "Continue")]')
                     ])
-                print(f"{username}: Nhấn xác nhận")
+                print(f"{hide_email(username)}: Nhấn xác nhận")
                 actions.move_to_element(other_veri_btn).click().perform() # Click Confirmed
             except Exception as e:
                 print(f"Error: {e}")
@@ -253,7 +260,7 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, cooki
                 (By.CSS_SELECTOR, 'div[class="x1ja2u2z x78zum5 x2lah0s x1n2onr6 xl56j7k x6s0dn4 xozqiw3 x1q0g3np x972fbf xcfux6l x1qhh985 xm0m39n x9f619 xtvsq51 xi112ho x17zwfj4 x585lrc x1403ito x1fq8qgq x1ghtduv x1oktzhs"]')
             ])
             if button != None:
-                print(f"{username}: Ghi nhớ trình duyệt")
+                print(f"{hide_email(username)}: Ghi nhớ trình duyệt")
                 actions.move_to_element(button).click().perform()
                 time.sleep(5)
 
@@ -287,7 +294,7 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, cooki
         _url = base_url_with_path(driver.current_url)
         if _url == "www.facebook.com" or _url == "www.facebook.com/login" or _url.startswith("www.facebook.com/checkpoint/"):
             raise Exception(f"Đăng nhập thất bại [{_url}]")
-        print(f"{username}: Đăng nhập thành công [{driver.current_url}]")
+        print(f"{hide_email(username)}: Đăng nhập thành công [{driver.current_url}]")
     except Exception as e:
         print(f"Error: {e}")
         return None

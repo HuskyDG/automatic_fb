@@ -745,8 +745,10 @@ try:
                                 return f'Bot reset with new memory "{msg}"'
 
                             def mute_chat(mode):
+                                global should_not_chat
                                 if mode == "true" or mode == "1":
                                     chat_histories["status"][message_id] = False
+                                    should_not_chat = True
                                     return f'Bot has been muted'
                                 if mode == "false" or mode == "0":
                                     chat_histories["status"][message_id] = True

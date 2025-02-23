@@ -567,6 +567,7 @@ try:
                             stop_msg = work_jobs.get("aichat_stopmsg", None)
                             start_regex = work_jobs.get("aichat_startat", None)
                             start_msg = work_jobs.get("aichat_startmsg", None)
+                            bye_msg = work_jobs.get("aichat_byemsg", None)
 
                             for _x in range(3):
                                 stop = False
@@ -922,9 +923,12 @@ try:
                                         reply_msg, bot_commands = extract_keywords(r'\[cmd\](.*?)\[/cmd\]', reply_msg)
 
                                         print_with_time("AI Trả lời:", caption)
-                                        if is_group_chat and "bye" in bot_commands and "aichat_nobye" not in work_jobs:
-                                            chat_histories["status"][message_id] = False
-                                            chat_histories["status"][facebok_id] = False
+                                        if "bye" in bot_commands:
+                                            if is_group_chat and "aichat_nobye" not in work_jobs:
+                                                chat_histories["status"][message_id] = False
+                                                chat_histories["status"][facebok_id] = False
+                                            if bye_msg:
+                                                reply_msg += "\n" + bye_msg
                                         for adult, img_keywords in img_search.items():
                                             for img_keyword in img_keywords:
                                                 try:

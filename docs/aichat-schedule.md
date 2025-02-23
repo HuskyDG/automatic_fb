@@ -33,6 +33,16 @@ Workflow được kích hoạt bởi hai sự kiện chính:
 - `cookies_text`: Nhập cookies nếu có. Không bắt buộc.
 - `ai_prompt`: Nhập lời giới thiệu cho AI (tham khảo file `setup/introduction.txt`). Không bắt buộc.
 - `work_jobs`: Nhập các tác vụ cần thực hiện, ví dụ: `aichat=normal,friends`. Mặc định là `aichat=normal,friends`.
+  + `aichat=normal` - Chatbot bình thường
+  + `aichat=devmode` - Chatbot ở chế độ debug. Chế độ này có thể tạo các nội dung không lành mạnh, ví dụ ảnh khiêu dâm.
+  + `friends` - Tự động chấp nhận kết bạn
+  + `aichat_nobye` - Không cho phép chatbot tự dừng cuộc trò chuyện
+  + `aichat_resetat=<regex pattern>` - Nếu tin nhắn nhận được khớp với `<regex pattern>`, thì bot sẽ xóa bộ nhớ cuộc trò chuyện. Ví dụ lệnh reset: `aichat_resetat=^\(\s*\)\/reset\(\s*\)\$`
+  + `aichat_resetmsg=<msg>` - Tin nhắn mà bot sẽ gửi khi xóa bộ nhớ cuộc trò chuyện
+  + `aichat_stopat=<regex pattern>` - Nếu tin nhắn nhận được khớp với `<regex pattern>`, thì bot sẽ dừng cuộc trò chuyện. Ví dụ lệnh mute: `aichat_stopat=^\(\s*\)\/mute\(\s*\)\$`
+  + `aichat_stopmsg=<msg>` - Tin nhắn mà bot sẽ gửi khi dừng cuộc trò chuyện
+  + `aichat_startat=<regex pattern>` - Nếu tin nhắn nhận được khớp với `<regex pattern>`, thì bot sẽ tiếp tục cuộc trò chuyện. Ví dụ lệnh unmute: `aichat_stopat=^\(\s*\)\/unmute\(\s*\)\$`
+  + `aichat_startmsg=<msg>` - Tin nhắn mà bot sẽ gửi khi bắt đầu cuộc trò chuyện
 - `check_only`: Nếu đặt là `true`, chỉ kiểm tra đăng nhập và lưu cấu hình cookies, không chạy AI Chat. Mặc định là `false`.
 
 ---

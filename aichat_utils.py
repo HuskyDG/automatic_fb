@@ -147,11 +147,6 @@ def switch_to_desktop_view(driver):
 def is_cmd(text):
     return text == "/cmd" or text.startswith("/cmd ")
 
-# Define functions to be called
-import pyotp
-def totp_cmd(secret):
-    return pyotp.TOTP(secret).now()
-
 def get_file_data(driver, url):
     base64_data = driver.execute_script("""
         const blobUrl = arguments[0];

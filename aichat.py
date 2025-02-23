@@ -781,8 +781,7 @@ try:
                                 return f"Bot is unmuted in chat with id {chatid}"
 
                             # Dictionary mapping arg1 to functions
-                            func = {                    
-                                "totp": totp_cmd,
+                            func = {
                                 "reset": reset_chat,
                                 "mute" : mute_by_id,
                                 "unmute" : mute_by_id,

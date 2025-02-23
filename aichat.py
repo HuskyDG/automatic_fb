@@ -827,12 +827,15 @@ try:
                                             command_result += start_msg + "\n"
                                     
 
-                            if len(chat_history) > 200:
+                            max_lines = 75
+                            summary_lines = 25
+                            left_lines = max_lines - summary_lines
+                            if len(chat_history) > max_lines:
                                 try:
                                     # Summary old 100 messages
                                     __num_video = 0
                                     __num_file = 0
-                                    for msg in reversed(chat_history[:50]):
+                                    for msg in reversed(chat_history[:summary_lines]):
                                         if msg["message_type"] == "file":
                                             if msg["info"]["msg"] == "send video":
                                                 __num_video += 1  # Increment first
@@ -840,7 +843,7 @@ try:
                                             elif msg["info"]["msg"] == "send file":
                                                 __num_file += 1  # Increment first
                                                 msg["info"]["loaded"] = __num_file <= max_file  # Compare after incrementing
-                                    prompt_to_summary = process_chat_history(chat_history[:50])
+                                    prompt_to_summary = process_chat_history(chat_history[:summary_lines])
                                     prompt_to_summary.append(">> Tell me information about this chat conversation in English, direct, unquoted and no markdown")
                                     response = model.generate_content(prompt_to_summary)
                                     if not response.candidates:
@@ -850,7 +853,7 @@ try:
                                 except Exception as e:
                                     print_with_time(e)
                                     caption = "Old chat conversation is deleted"
-                                chat_history = chat_history[-150:]
+                                chat_history = chat_history[-left_lines:]
                                 chat_history.insert(0, {"message_type" : "summary_old_chat", "info" : caption})
 
                             chat_history.extend(chat_history_new)

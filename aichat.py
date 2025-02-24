@@ -935,7 +935,6 @@ try:
                                 try:
                                     button = get_message_input()
                                     driver.execute_script("arguments[0].click();", button)
-                                    get_message_input().send_keys(" ")
                                     if caption is None and not is_command_msg:
                                         response = model.generate_content(prompt_list)
                                         if not response.candidates:

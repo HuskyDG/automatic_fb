@@ -352,29 +352,45 @@ try:
                 except Exception:
                     pass
 
-                # find all unread single chats not group (span[class="x6s0dn4 xzolkzo x12go9s9 x1rnf11y xprq8jg x9f619 x3nfvp2 xl56j7k x1spa7qu x1kpxq89 xsmyaan"])
-                chat_btns = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"]')
                 pressed_chat = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"][aria-current="page"]')
                 if len(pressed_chat) > 0: # There should be no chat is pressed
-                    last_reload_ts = 0
+                    last_reload_ts = 0 # reload to fix
                     continue
+
                 chat_list = []
+                # find all chat buttons
+                chat_btns = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"]')
                 for chat_btn in chat_btns:
-                    #print_with_time(chat_btn.text)
                     try:
                         chat_btn.find_element(By.CSS_SELECTOR, 'span.x6s0dn4.xzolkzo.x12go9s9.x1rnf11y.xprq8jg.x9f619.x3nfvp2.xl56j7k.x1spa7qu.x1kpxq89.xsmyaan')
                         chat_name = chat_btn.find_element(By.CSS_SELECTOR, 'span.x1lliihq.x6ikm8r.x10wlt62.x1n2onr6.xlyipyv.xuxw1ft').text
-                        chat_list.append({ "obj" : chat_btn, "name" : chat_name })
+                        chat_list.append({ "href" : chat_btn.get_attribute("href"), "name" : chat_name })
                     except Exception:
                         continue
 
                 def get_message_input():
                     return driver.find_element(By.CSS_SELECTOR, 'p.xat24cr.xdj266r')
 
+                if len(chat_list) <= 0:
+                    continue
+                print_with_time(f"Nhận được {len(chat_list)} tin nhắn mới")
+
                 for chat_info in chat_list:
                     if True:
                         is_group_chat = False
-                        chat_btn = chat_info["obj"]
+                        chat_href = chat_info["href"]
+                        chat_btn = None
+
+                        # Relocated button if possible
+                        chat_btns = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"]')
+                        for btn in chat_btns:
+                            if btn.get_attribute("href") == chat_href:
+                                chat_btn = btn
+                                break
+
+                        if not chat_btn:
+                            continue # Unable to find the button in current frame, skip
+
                         driver.execute_script("arguments[0].click();", chat_btn)
                         time.sleep(1)
                         
@@ -387,7 +403,7 @@ try:
                             print_with_time(e)
                         
                         try:
-                            profile_btn = driver.find_elements(By.CSS_SELECTOR, 'a[class="x1i10hfl x1qjc9v5 xjbqb8w xjqpnuy xa49m3k xqeqjp1 x2hbi6w x13fuv20 xu3j5b3 x1q0q8m5 x26u7qi x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xdl72j9 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r x2lwn1j xeuugli xexx8yu x4uap5 x18d9i69 xkhd6sd x1n2onr6 x16tdsg8 x1hl2dhg xggy1nq x1ja2u2z x1t137rt x1o1ewxj x3x9cwd x1e5q0jg x13rtm0m x1q0g3np x87ps6o x1lku1pv x1rg5ohu x1a2a7pz xs83m0k"]')
+                            profile_btn = driver.find_elements(By.CSS_SELECTOR, 'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xa49m3k.xqeqjp1.x2hbi6w.x13fuv20.xu3j5b3.x1q0q8m5.x26u7qi.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xdl72j9.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.x2lwn1j.xeuugli.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1rg5ohu.x1a2a7pz.xs83m0k')
                             facebook_info = None
                             facebook_id = None
                             if len(profile_btn) > 0:

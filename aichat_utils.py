@@ -193,33 +193,37 @@ def download_image_to_bytesio(image_link):
     return io.BytesIO(response.content)
 
 def drop_image(driver, element, image_bytesio):
-    """ Drop a BytesIO image into a web element using JavaScript """
+    """Drop a BytesIO image into a web element using JavaScript"""
     base64_image = image_to_base64(image_bytesio)
-
     js_script = """
-    async function dropBase64Image(base64Data, dropTarget) {
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
+    async function dropBase64Image(base64Data, dropTarget, callback) {
+        try {
+            const byteCharacters = atob(base64Data);
+            const byteNumbers = new Array(byteCharacters.length);
+            
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'image/png' });
+            const file = new File([blob], 'image.png', { type: 'image/png' });
+
+            const dt = new DataTransfer();
+            dt.items.add(file);
+
+            const event = new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt });
+            dropTarget.dispatchEvent(event);
+            
+            callback(); // Signal completion
+        } catch (error) {
+            callback(error);
         }
-        
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'image/png' });
-        const file = new File([blob], 'image.png', { type: 'image/png' });
-
-        const dt = new DataTransfer();
-        dt.items.add(file);
-
-        const event = new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt });
-        dropTarget.dispatchEvent(event);
     }
 
-    dropBase64Image(arguments[0], arguments[1]);
+    dropBase64Image(arguments[0], arguments[1], arguments[2]);
     """
-
-    driver.execute_script(js_script, base64_image, element)
+    driver.execute_async_script(js_script, base64_image, element)
 
 import re
 

@@ -955,6 +955,7 @@ try:
                                                             continue
                                                         print_with_time(f"AI gửi ảnh {img_keyword} từ: {image_link}")
                                                         drop_image(driver, button, image_io)
+                                                        get_message_input().send_keys("\n") # Press Enter to send image
                                                         break
                                                 except:
                                                     print_with_time(f"Không thể gửi ảnh: {img_keyword}")

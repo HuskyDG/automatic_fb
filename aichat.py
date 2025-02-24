@@ -941,7 +941,7 @@ try:
                                         if "bye" in bot_commands:
                                             if is_group_chat and "aichat_nobye" not in work_jobs:
                                                 chat_histories["status"][message_id] = False
-                                                chat_histories["status"][facebok_id] = False
+                                                chat_histories["status"][facebook_id] = False
                                             if bye_msg:
                                                 reply_msg += "\n" + bye_msg
                                         for adult, img_keywords in img_search.items():

@@ -253,6 +253,9 @@ try:
 
     while True:
         try:
+            if base_url_with_path(driver.current_url).startswith("www.facebook.com/checkpoint/"):
+                print_with_time("Tài khoản bị đình chỉ bởi Facebook")
+                break
             if is_facebook_logged_out(driver.get_cookies()):
                 if bak_cache_fb is not None:
                     print_with_time("Tài khoản bị đăng xuất, sử dụng cookies dự phòng")

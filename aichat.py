@@ -684,6 +684,14 @@ try:
                                         chat_history.insert(0, {"message_type" : "new_chat", "info" : "You are mentioned in chat"})
                                 except Exception:
                                     pass
+                                if msg is None:
+                                    try:
+                                        msg_title = msg_element.find_element(By.CSS_SELECTOR, 'span.x1lliihq.x6ikm8r.x10wlt62.x1n2onr6')
+                                        msg = msg_title.text
+                                        msg_small = msg_element.find_element(By.CSS_SELECTOR, 'span.x1lliihq.x6ikm8r.x10wlt62.x1n2onr6.x1j85h84')
+                                        msg += "\n" + msg_small.text
+                                    except Exception:
+                                        pass
                                 
                                 try:
                                     image_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[class="xz74otr xmz0i5r x193iq5w"]')

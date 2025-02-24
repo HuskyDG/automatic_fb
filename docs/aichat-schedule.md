@@ -43,6 +43,7 @@ Workflow được kích hoạt bởi hai sự kiện chính:
   + `aichat_stopmsg=<msg>` - Tin nhắn mà bot sẽ gửi khi dừng cuộc trò chuyện
   + `aichat_startat=<regex pattern>` - Nếu tin nhắn nhận được khớp với `<regex pattern>`, thì bot sẽ tiếp tục cuộc trò chuyện. Ví dụ lệnh unmute: `aichat_stopat=^\(\s*\)\/unmute\(\s*\)\$`
   + `aichat_startmsg=<msg>` - Tin nhắn mà bot sẽ gửi khi bắt đầu cuộc trò chuyện
+  + Nếu bạn chỉ muốn áp dụng `aichat_*at` cho một số ID cụ thể. Hãy sử dụng `aichat_<name>_*at=<regex pattern>, aichat_<name>_*msg=<msg>, aichat_<fbid>_rules=<name>`
 - `check_only`: Nếu đặt là `true`, chỉ kiểm tra đăng nhập và lưu cấu hình cookies, không chạy AI Chat. Mặc định là `false`.
 
 ---

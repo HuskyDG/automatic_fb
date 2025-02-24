@@ -109,9 +109,58 @@
          <h3 id="️-cấu-hình-tùy-chọn-options">⚙️ Cấu hình tùy chọn (Options):</h3>
          <div class="language-plaintext highlighter-rouge">
             <div class="highlight">
-               <pre class="highlight"><code>aichat=normal, friends, aichat_nobye, aichat_resetmsg=start, aichat_resetat=Gõ\s+start\s+để\s+tìm\s+người\s+trò\s+chuyện\s+mới, aichat_stopat=Gõ\s+start\s+để\s+tìm\s+người\s+trò\s+chuyện\s+mới, aichat_startmsg=hi, aichat_startat=Bạn kết nối với ID: \d+
+               <pre class="highlight"><code>aichat=normal, friends, aichat_nobye, aichat_byemsg=pp, aichat_chatvn_resetmsg=start, aichat_chatvn_resetat=Gõ\s+start\s+để\s+tìm\s+người, aichat_chatvn_stopat=Gõ\s+start\s+để\s+tìm\s+người, aichat_chatvn_startmsg=hi, aichat_chatvn_startat=Bạn kết nối với ID: \d+, aichat_352350744623283_rules=chatvn, aichat_330930096770228_rules=chatvn, aichat_448993038307289_rules=chatvn, aichat_487120077827230_rules=chatvn
 </code></pre>
             </div>
+	    	<p>&nbsp;</p>
+			<ul>
+				<li>
+					<p><strong><code>aichat_nobye, aichat_byemsg=pp</code></strong></p>
+					<ul>
+						<li>Vô hiệu hóa hiệu lực command "bye" của bot và yêu cầu bot gửi tin nhắn <code>pp</code></li>
+					</ul>
+				</li>
+				<li>
+					<p><strong><code>aichat_chatvn_resetmsg=start</code></strong></p>
+					<ul>
+						<li>Khi bộ nhớ cuộc trò chuyện được reset, bot sẽ gửi tin nhắn <code>"start"</code> để báo hiệu điều đó.</li>
+					</ul>
+				</li>
+				<li>
+					<p><strong><code>aichat_chatvn_resetat=Gõ\s+start\s+để\s+tìm\s+người\s+trò\s+chuyện\s+mới</code></strong></p>
+					<ul>
+						<li>Nếu bot nhận được tin nhắn có nội dung <code>"Gõ start để tìm người trò chuyện mới"</code>, nó sẽ reset cuộc trò chuyện.</li>
+						<li><code>\s+</code> là regex biểu thị một hoặc nhiều khoảng trắng, cho phép chuỗi khớp ngay cả khi người dùng gõ nhiều khoảng trắng giữa các từ.</li>
+					</ul>
+				</li>
+				<li>
+					<p><strong><code>aichat_chatvn_stopat=Gõ\s+start\s+để\s+tìm\s+người\s+trò\s+chuyện\s+mới</code></strong></p>
+					<ul>
+						<li>Nếu bot nhận được tin nhắn này, nó sẽ dừng cuộc trò chuyện.</li>
+					</ul>
+				</li>
+				<li>
+					<p><strong><code>aichat_chatvn_startmsg=hi</code></strong></p>
+					<ul>
+						<li>Khi cuộc trò chuyện bắt đầu, bot sẽ gửi tin nhắn <code>"hi"</code>.</li>
+					</ul>
+				</li>
+				<li>
+					<p><strong><code>aichat_chatvn_startat=Bạn kết nối với ID: \d+</code></strong></p>
+					<ul>
+						<li>Khi bot nhận được tin nhắn có định dạng <code>"Bạn kết nối với ID: &lt;số&gt;"</code>, nó sẽ bắt đầu cuộc trò chuyện.</li>
+						<li><code>\d+</code> là regex biểu thị một hoặc nhiều chữ số, nghĩa là nó sẽ khớp với bất kỳ số ID nào.</li>
+					</ul>
+				</li>
+				<li>
+					<p><strong><code>aichat_352350744623283_rules=chatvn</code></strong></p>
+					<ul>
+						<li>Xác định bộ quy tắc áp dụng cho một ID cụ thể (<code>352350744623283</code>), sử dụng quy tắc <code>"chatvn"</code>.</li>
+						<li>Có thể đây là một nhóm người dùng hoặc kênh cụ thể được thiết lập theo quy tắc <code>"chatvn"</code>.</li>
+					</ul>
+				</li>
+			</ul>
+			<p>&nbsp;</p>
          </div>
          <hr />
          <h2 id="-hoàn-tất">🎉 Hoàn tất!</h2>

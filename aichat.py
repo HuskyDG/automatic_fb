@@ -576,8 +576,7 @@ try:
                                     try: 
                                         msg_element.find_element(By.CSS_SELECTOR, 'div[class="html-div xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp x11i5rnm x12nagc x1mh8g0r x1yc453h x126k92a xyk4ms5"]').text
                                         # our msg, at this point we should shop reading if we cached previous one
-                                        if len(chat_history) > 0:
-                                            stop = True
+                                        stop = True
                                     except:
                                         pass
                                     driver.execute_script('arguments[0].setAttribute("__read", "yes");', msg_element)
@@ -607,13 +606,9 @@ try:
                                     quotes_text = None
 
                                 # Finding name
-                                stop = False
                                 try: 
                                     msg_element.find_element(By.CSS_SELECTOR, 'div[class="html-div xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp x11i5rnm x12nagc x1mh8g0r x1yc453h x126k92a xyk4ms5"]').text
-                                    if len(chat_history) > 0:
-                                        break
-                                    name = myname
-                                    mark = "your_text_message"
+                                    break
                                 except Exception:
                                     name = None
                                     mark = "text_message"

@@ -128,6 +128,15 @@ try:
 
     print_with_time("Danh sách jobs:", work_jobs)
 
+    # global regex
+    global_reset_regex = work_jobs.get("aichat_resetat", None)
+    global_reset_msg = work_jobs.get("aichat_resetmsg", None)
+    global_stop_regex = work_jobs.get("aichat_stopat", None)
+    global_stop_msg = work_jobs.get("aichat_stopmsg", None)
+    global_start_regex = work_jobs.get("aichat_startat", None)
+    global_start_msg = work_jobs.get("aichat_startmsg", None)
+    global_bye_msg = work_jobs.get("aichat_byemsg", None)
+
     driver.execute_cdp_cmd("Emulation.setScriptExecutionDisabled", {"value": True})
     driver.get("https://www.facebook.com")
     driver.delete_all_cookies()
@@ -423,14 +432,6 @@ try:
                                 if facebook_info == None:
                                     driver.switch_to.window(profile_tab)
                                     driver.get(profile_link)
-                                    parsed_url = urlparse(profile_link)
-
-                                    # Remove the trailing slash from the path, if it exists
-                                    urlpath = parsed_url.path.rstrip("/")
-                                    
-                                    # Split the path and extract the ID
-                                    path_parts = urlpath.split("/")
-                                    facebook_id = path_parts[-1] if len(path_parts) > 1 else None
 
                                     print_with_time(f"Đang lấy thông tin cá nhân từ {profile_link}")
                                     
@@ -482,15 +483,23 @@ try:
                             else:
                                 is_group_chat = True
                                 who_chatted = chat_info["name"]
-                                facebook_info = { "Facebook group name" : who_chatted }
+                                facebook_info = { "Facebook group name" : who_chatted, "Facebook url" :  driver.current_url }
+
+                            parsed_url = urlparse(facebook_info.get("Facebook url", None))
+                            # Remove the trailing slash from the path, if it exists
+                            urlpath = parsed_url.path.rstrip("/")
+                            # Split the path and extract the ID
+                            path_parts = urlpath.split("/")
+                            facebook_id = path_parts[-1] if len(path_parts) > 1 else None
                         except Exception as e:
                             print_with_time(e)
                             continue
 
+
                     while True:
                         try:
                             driver.switch_to.window(chat_tab)
-                            print_with_time("Tin nhắn mới từ " + who_chatted)
+                            print_with_time(f"Tin nhắn mới từ {who_chatted} (ID: {facebook_id})")
                             print_with_time(json.dumps(facebook_info, ensure_ascii=False, indent=2))
 
                             parsed_url = urlparse(driver.current_url)
@@ -501,8 +510,6 @@ try:
                             # Split the path and extract the ID
                             path_parts = urlpath.split("/")
                             message_id = path_parts[-1] if len(path_parts) > 1 else "0"
-                            if not facebook_id:
-                                facebook_id = message_id
 
                             time.sleep(1)
                             # Wait until box is visible
@@ -578,14 +585,27 @@ try:
                             num_video = 0
                             max_file = 10
                             num_file = 0
-                            reset_regex = work_jobs.get("aichat_resetat", None)
-                            reset_msg = work_jobs.get("aichat_resetmsg", None)
-                            stop_regex = work_jobs.get("aichat_stopat", None)
-                            stop_msg = work_jobs.get("aichat_stopmsg", None)
-                            start_regex = work_jobs.get("aichat_startat", None)
-                            start_msg = work_jobs.get("aichat_startmsg", None)
-                            bye_msg = work_jobs.get("aichat_byemsg", None)
-
+                            regex_rules_applied = work_jobs.get(f"aichat_{facebook_id}_rules", "")
+                            regex_rules_applied = regex_rules_applied.split() if regex_rules_applied else []
+                            reset_regex_list = { global_reset_msg : global_reset_msg }
+                            stop_regex_list = { global_stop_msg : global_stop_msg }
+                            start_regex_list = { global_start_msg : global_start_msg }
+                            
+                            if regex_rules_applied:
+                                print_with_time(f"Áp dụng quy tắc: {regex_rules_applied}")
+                                for name in regex_rules_applied:
+                                    reset_regex = work_jobs.get(f"aichat_{name}_resetat", None)
+                                    reset_msg = work_jobs.get(f"aichat_{name}_resetmsg", None)
+                                    reset_regex_list[reset_regex] = reset_msg
+                                    
+                                    stop_regex = work_jobs.get(f"aichat_{name}_stopat", None)
+                                    stop_msg = work_jobs.get(f"aichat_{name}_stopmsg", None)
+                                    stop_regex_list[stop_regex] = stop_msg
+                                    
+                                    start_regex = work_jobs.get(f"aichat_{name}_startat", None)
+                                    start_msg = work_jobs.get(f"aichat_{name}_startmsg", None)
+                                    start_regex_list[start_regex] = start_msg
+                            
                             for _x in range(3):
                                 stop = False
                                 for msg_element in reversed(msg_table.find_elements(By.CSS_SELECTOR, 'div[role="row"]:not([__read])')):
@@ -824,18 +844,16 @@ try:
                                 if msg["message_type"] == "text_message":
                                     if is_cmd(msg["info"]["msg"]):
                                         command_result += parse_and_execute(msg["info"]["msg"]) + "\n"
-                                    if reset_regex and re.search(reset_regex, msg["info"]["msg"]):
-                                        reset_chat("New chat")
-                                        if reset_msg:
-                                            command_result += reset_msg + "\n"
-                                    if stop_regex and re.search(stop_regex, msg["info"]["msg"]):
-                                        mute_chat("true")
-                                        if stop_msg:
-                                            command_result += stop_msg + "\n"
-                                    if start_regex and re.search(start_regex, msg["info"]["msg"]):
-                                        mute_chat("false")
-                                        if start_msg:
-                                            command_result += start_msg + "\n"
+                                    for regex_list, action, value in [
+                                        (reset_regex_list, reset_chat, "New chat"),
+                                        (stop_regex_list, mute_chat, "true"),
+                                        (start_regex_list, mute_chat, "false")
+                                    ]:
+                                        for regex, msg_text in regex_list.items():
+                                            if regex and re.search(regex, msg["info"]["msg"]):
+                                                action(value)  # Calls reset_chat("New chat") or mute_chat("true"/"false")
+                                                if msg_text:
+                                                    command_result += msg_text + "\n"
                                     
 
                             max_lines = 75
@@ -942,7 +960,7 @@ try:
                                             if is_group_chat and "aichat_nobye" not in work_jobs:
                                                 chat_histories["status"][message_id] = False
                                                 chat_histories["status"][facebook_id] = False
-                                            if bye_msg:
+                                            if global_bye_msg:
                                                 reply_msg += "\n" + bye_msg
                                         for adult, img_keywords in img_search.items():
                                             for img_keyword in img_keywords:

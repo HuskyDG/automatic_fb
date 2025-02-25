@@ -942,8 +942,7 @@ try:
                       
                             prompt_list.insert(0, header_prompt)
                             exam = json.dumps({"message_type" : "your_text_message", "info" : {"name" : myname, "msg" : "Your \"message\" is here - \"Tin nhắn\" của bạn ở đây 😊"}, "mentioned_message" : None }, ensure_ascii=False)
-                            escaped_dq = r'\"'
-                            prompt_list.append(f'>> Provide JSON to answer, no markdown, no ensure ASCII, escape double quote in msg with: {escaped_dq}\nExample: \n```json\n{exam}\n```')
+                            prompt_list.append(f'>> Generate a reply response in properly formatted JSON. Do NOT include extra text or explanations. Every string must be escaped correctly\nExample: \n```json\n{exam}\n```')
                             
                             caption = None
                             for _x in range(10):

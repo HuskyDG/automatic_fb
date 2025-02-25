@@ -247,6 +247,14 @@ def parse_opts_string(input_str):
     return result
 
 import json
+import json5  # More lenient JSON parser
+
+def fix_json(gemini_output):
+    try:
+        return json.loads(gemini_output)  # Try strict parsing
+    except json.JSONDecodeError:
+        return json5.loads(gemini_output)  # Fallback to lenient parsing
+
 def extract_json_from_markdown(markdown_text):
     """Extracts the first JSON code block from a markdown string."""
     pattern = r'```json(.*?)```'
@@ -254,10 +262,9 @@ def extract_json_from_markdown(markdown_text):
     
     if match:
         try:
-            return json.loads(match.group(1))
-        except json.JSONDecodeError as e:
+            return fix_json(match.group(1))
+        except Exception as e:
             print(f"Error parsing JSON: {e}")
-    
     return None
 
 def extract_keywords(pattern, text):

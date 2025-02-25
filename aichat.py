@@ -959,9 +959,6 @@ try:
                                             caption = "(y)"
                                         else:
                                             caption = response.text
-                                            json_msg = extract_json_from_markdown(caption)
-                                            if json_msg:
-                                                caption = json_msg["info"]["msg"]
                                     if caption is not None:
                                         img_search = {}
                                         reply_msg, img_search["on"] = extract_keywords(r'\[image\](.*?)\[/image\]', caption)
@@ -970,8 +967,11 @@ try:
                                         else:
                                             reply_msg, _ = extract_keywords(r'\[adultimg\](.*?)\[/adultimg\]', reply_msg)
                                         reply_msg, bot_commands = extract_keywords(r'\[cmd\](.*?)\[/cmd\]', reply_msg)
+                                        
+                                        json_msg = extract_json_from_markdown(reply_msg)
+                                        if json_msg:
+                                            reply_msg = json_msg["info"]["msg"]
 
-                                        print_with_time("AI Trả lời:", caption)
                                         if "bye" in bot_commands:
                                             if is_group_chat and "aichat_nobye" not in work_jobs:
                                                 chat_histories["status"][message_id] = False
@@ -995,6 +995,7 @@ try:
                                                 except:
                                                     print_with_time(f"Không thể gửi ảnh: {img_keyword}")
                                         time.sleep(0.5)
+                                        print_with_time("AI Trả lời:", reply_msg)
                                         get_message_input().send_keys(remove_non_bmp_characters(replace_emoji_with_shortcut(reply_msg) + "\n"))
 
                                     chat_history.append({"message_type" : "your_text_message", "info" : {"name" : myname, "msg" : caption}, "mentioned_message" : None })

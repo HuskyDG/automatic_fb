@@ -972,7 +972,7 @@ try:
                                                 chat_histories["status"][message_id] = False
                                                 chat_histories["status"][facebook_id] = False
                                             if global_bye_msg:
-                                                reply_msg += "\n" + bye_msg
+                                                reply_msg += "\n" + global_bye_msg
                                         for adult, img_keywords in img_search.items():
                                             for img_keyword in img_keywords:
                                                 try:

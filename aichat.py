@@ -593,6 +593,7 @@ try:
                             reset_regex_list = { global_reset_msg : global_reset_msg }
                             stop_regex_list = { global_stop_msg : global_stop_msg }
                             start_regex_list = { global_start_msg : global_start_msg }
+                            bye_msg_list = [ global_bye_msg ]
                             
                             if regex_rules_applied:
                                 print_with_time(f"Áp dụng quy tắc: {regex_rules_applied}")
@@ -608,6 +609,8 @@ try:
                                     start_regex = work_jobs.get(f"aichat_{name}_startat", None)
                                     start_msg = work_jobs.get(f"aichat_{name}_startmsg", None)
                                     start_regex_list[start_regex] = start_msg
+                                    
+                                    bye_msg_list.append(work_jobs.get(f"aichat_{name}_byemsg", None))
                             
                             for _x in range(3):
                                 stop = False
@@ -973,8 +976,9 @@ try:
                                             if is_group_chat and "aichat_nobye" not in work_jobs:
                                                 chat_histories["status"][message_id] = False
                                                 chat_histories["status"][facebook_id] = False
-                                            if global_bye_msg:
-                                                reply_msg += "\n" + global_bye_msg
+                                            for bye_msg in bye_msg_list:
+                                                if bye_msg:
+                                                    reply_msg += "\n" + bye_msg
                                         for adult, img_keywords in img_search.items():
                                             for img_keyword in img_keywords:
                                                 try:

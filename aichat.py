@@ -851,6 +851,12 @@ try:
                                 else:
                                     return f"Unknown command: {arg1}"
 
+                            if len(chat_history_new) <= 0:
+                                break
+                            last_msg = chat_history_new[-1]
+                            if last_msg["message_type"] == "your_text_message":
+                                break
+
                             for msg in chat_history_new:
                                 if msg["message_type"] == "text_message":
                                     if is_cmd(msg["info"]["msg"]):
@@ -865,7 +871,24 @@ try:
                                                 action(value)  # Calls reset_chat("New chat") or mute_chat("true"/"false")
                                                 if msg_text:
                                                     command_result += msg_text + "\n"
-                                    
+
+                            if command_result:
+                                try:
+                                    button = get_message_input()
+                                    driver.execute_script("arguments[0].click();", button)
+                                    get_message_input().send_keys(Keys.CONTROL + "a")  # Select all text
+                                    get_message_input().send_keys(Keys.DELETE)  # Delete the selected text
+                                    time.sleep(0.5)
+                                    get_message_input().send_keys(remove_non_bmp_characters(replace_emoji_with_shortcut(command_result) + "\n"))
+                                except:
+                                    pass
+                            is_command_msg = last_msg["message_type"] == "text_message" and is_cmd(last_msg["info"]["msg"])
+                            if is_command_msg:
+                                break
+                            if reset:
+                                break
+                            if should_not_chat:
+                                break
 
                             max_lines = 75
                             summary_lines = 25
@@ -898,9 +921,6 @@ try:
 
                             chat_history.extend(chat_history_new)
 
-                            if len(chat_history) <= 0:
-                                break
-                            last_msg = chat_history[-1]
                             for msg in reversed(chat_history):
                                 if msg["message_type"] == "file":
                                     if msg["info"]["msg"] == "send video":
@@ -915,10 +935,6 @@ try:
                                 for prompt in prompt_list:
                                     print_with_time(prompt)
                             print_with_time(f"<{len(chat_history)} tin nhắn từ {who_chatted}>")
-
-                            if last_msg["message_type"] == "your_text_message":
-                                break
-                            is_command_msg = last_msg["message_type"] == "text_message" and is_cmd(last_msg["info"]["msg"])
                                 
                       
                             prompt_list.insert(0, header_prompt)
@@ -927,26 +943,11 @@ try:
                             prompt_list.append(f'>> Provide JSON to answer, no markdown, no ensure ASCII, escape double quote in msg with: {escaped_dq}\nExample: \n```json\n{exam}\n```')
                             
                             caption = None
-                            
-                            if command_result:
-                                try:
-                                    button = get_message_input()
-                                    driver.execute_script("arguments[0].click();", button)
-                                    get_message_input().send_keys(Keys.CONTROL + "a")  # Select all text
-                                    get_message_input().send_keys(Keys.DELETE)  # Delete the selected text
-                                    time.sleep(0.5)
-                                    get_message_input().send_keys(remove_non_bmp_characters(replace_emoji_with_shortcut(command_result) + "\n"))
-                                except:
-                                    pass
                             for _x in range(10):
-                                if reset:
-                                    break
-                                if should_not_chat:
-                                    break
                                 try:
                                     button = get_message_input()
                                     driver.execute_script("arguments[0].click();", button)
-                                    if caption is None and not is_command_msg:
+                                    if caption is None:
                                         response = model.generate_content(prompt_list)
                                         if not response.candidates:
                                             chat_history = [{"message_type" : "summary_old_chat", "info" : "The previous conversation has been deleted"}]
@@ -956,7 +957,7 @@ try:
                                             json_msg = extract_json_from_markdown(caption)
                                             if json_msg:
                                                 caption = json_msg["info"]["msg"]
-                                    if caption is not None and not is_command_msg:
+                                    if caption is not None:
                                         img_search = {}
                                         reply_msg, img_search["on"] = extract_keywords(r'\[image\](.*?)\[/image\]', caption)
                                         if work_jobs["aichat"] == "devmode":

@@ -947,6 +947,8 @@ try:
                                 try:
                                     button = get_message_input()
                                     driver.execute_script("arguments[0].click();", button)
+                                    get_message_input().send_keys(Keys.CONTROL + "a")  # Select all text
+                                    get_message_input().send_keys(Keys.DELETE)  # Delete the selected text
                                     if caption is None:
                                         response = model.generate_content(prompt_list)
                                         if not response.candidates:
@@ -988,8 +990,6 @@ try:
                                                         break
                                                 except:
                                                     print_with_time(f"Không thể gửi ảnh: {img_keyword}")
-                                        get_message_input().send_keys(Keys.CONTROL + "a")  # Select all text
-                                        get_message_input().send_keys(Keys.DELETE)  # Delete the selected text
                                         time.sleep(0.5)
                                         get_message_input().send_keys(remove_non_bmp_characters(replace_emoji_with_shortcut(reply_msg) + "\n"))
 

@@ -976,7 +976,8 @@ try:
                                         if work_jobs["aichat"] == "devmode":
                                             reply_msg, img_search["off"] = extract_keywords(r'\[adultimg\](.*?)\[/adultimg\]', reply_msg)
                                         else:
-                                            reply_msg, _ = extract_keywords(r'\[adultimg\](.*?)\[/adultimg\]', reply_msg)
+                                            reply_msg, _img_search = extract_keywords(r'\[adultimg\](.*?)\[/adultimg\]', reply_msg)
+                                            img_search["on"].extend(_img_search)
                                         reply_msg, bot_commands = extract_keywords(r'\[cmd\](.*?)\[/cmd\]', reply_msg)
                                         
                                         json_msg = extract_json_from_markdown(reply_msg)

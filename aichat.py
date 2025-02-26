@@ -254,10 +254,13 @@ try:
     facebook_infos = pickle_from_file(f_facebook_infos, {})
 
     print_with_time("Bắt đầu khởi động!")
-    last_reload_ts = int(time.time())
 
     next_chat_tab = chat_tab
     next_chat_url = "www.facebook.com/messages/new"
+    last_reload_ts_mapping = {
+        chat_tab : 0,
+        rqchat_tab : 0,
+    }
 
     while True:
         try:
@@ -348,10 +351,10 @@ try:
 
             if "aichat" in work_jobs:
                 driver.switch_to.window(next_chat_tab)
-                if base_url_with_path(driver.current_url) != next_chat_url or (int(time.time()) - last_reload_ts) > 60*5:
+                if base_url_with_path(driver.current_url) != next_chat_url or (int(time.time()) - last_reload_ts_mapping.get(next_chat_tab, 0)) > 60*5:
                     print_with_time("Tải lại trang messenger...")
                     driver.get(f"https://{next_chat_url}")
-                    last_reload_ts = int(time.time())
+                    last_reload_ts_mapping[next_chat_tab] = int(time.time())
                 try:
                     if len(onetimecode) >= 6:
                         otc_input = driver.find_element(By.CSS_SELECTOR, 'input[autocomplete="one-time-code"]')
@@ -374,7 +377,7 @@ try:
 
                 pressed_chat = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"][aria-current="page"]')
                 if len(pressed_chat) > 0: # There should be no chat is pressed
-                    last_reload_ts = 0 # reload to fix
+                    last_reload_ts_mapping[next_chat_tab] = 0 # reload to fix
                     continue
 
                 chat_list = []

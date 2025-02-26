@@ -633,8 +633,12 @@ try:
                                             div.parentNode.replaceChild(disabledDiv, div);  // Replace the div with the custom tag
                                         });
                                     """)
+                                if not msg_scroller:
+                                    break
                                 driver.execute_script("arguments[0].scrollTop = 0;", msg_scroller)
                                 time.sleep(0.1)
+                            if msg_scroller:
+                                driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight;", msg_scroller)
 
                             for msg_element in reversed(msg_table.find_elements(By.CSS_SELECTOR, 'div[role="row"]')):
                                 try:

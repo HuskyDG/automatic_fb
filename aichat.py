@@ -89,6 +89,10 @@ try:
     
     driver.switch_to.new_window('tab')
     driver.execute_cdp_cmd('Emulation.setTimezoneOverride', tz_params)
+    rqchat_tab = driver.current_window_handle
+    
+    driver.switch_to.new_window('tab')
+    driver.execute_cdp_cmd('Emulation.setTimezoneOverride', tz_params)
     friend_tab = driver.current_window_handle
 
     driver.switch_to.new_window('tab')
@@ -252,6 +256,9 @@ try:
     print_with_time("Bắt đầu khởi động!")
     last_reload_ts = int(time.time())
 
+    next_chat_tab = chat_tab
+    next_chat_url = "www.facebook.com/messages/new"
+
     while True:
         try:
             if base_url_with_path(driver.current_url).startswith("www.facebook.com/checkpoint/"):
@@ -340,10 +347,10 @@ try:
                 inject_reload(driver)
 
             if "aichat" in work_jobs:
-                driver.switch_to.window(chat_tab)
-                if base_url_with_path(driver.current_url) != "www.facebook.com/messages/new" or (int(time.time()) - last_reload_ts) > 60*5:
+                driver.switch_to.window(next_chat_tab)
+                if base_url_with_path(driver.current_url) != next_chat_url or (int(time.time()) - last_reload_ts) > 60*5:
                     print_with_time("Tải lại trang messenger...")
-                    driver.get("https://www.facebook.com/messages/new")
+                    driver.get(f"https://{next_chat_url}")
                     last_reload_ts = int(time.time())
                 try:
                     if len(onetimecode) >= 6:
@@ -502,7 +509,7 @@ try:
 
                     while True:
                         try:
-                            driver.switch_to.window(chat_tab)
+                            driver.switch_to.window(next_chat_tab)
                             print_with_time(f"Tin nhắn mới từ {who_chatted} (ID: {facebook_id})")
                             print_with_time(json.dumps(facebook_info, ensure_ascii=False, indent=2))
 
@@ -1023,6 +1030,19 @@ try:
                             break
         except Exception as e:
             print_with_time(e)
+        finally:
+            # Define a mapping of chat tabs to their corresponding URLs
+            chat_tab_mapping = {
+                chat_tab: "www.facebook.com/messages/new",
+                rqchat_tab: "www.facebook.com/messages/requests"
+            }
+
+            # Check the current tab and switch to the next one
+            if next_chat_tab in chat_tab_mapping:
+                # Switch to the other tab
+                next_chat_tab = rqchat_tab if next_chat_tab == chat_tab else chat_tab
+                # Update the URL based on the new tab
+                next_chat_url = chat_tab_mapping[next_chat_tab]
 
     if if_running_on_github_workflows:
         upload_file(GITHUB_TOKEN, GITHUB_REPO, f_facebook_infos, STORAGE_BRANCE)

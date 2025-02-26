@@ -967,7 +967,9 @@ try:
                                     get_message_input().send_keys(Keys.CONTROL + "a")  # Select all text
                                     get_message_input().send_keys(Keys.DELETE)  # Delete the selected text
                                     if caption is None:
-                                        response = model.generate_content(prompt_list)
+                                        response = model.generate_content(prompt_list, generation_config=genai.GenerationConfig(
+                                            response_mime_type="application/json"
+                                        ),)
                                         if not response.candidates:
                                             chat_history = [{"message_type" : "summary_old_chat", "info" : "The previous conversation has been deleted"}]
                                             caption = "(y)"
@@ -983,9 +985,8 @@ try:
                                             img_search["on"].extend(_img_search)
                                         reply_msg, bot_commands = extract_keywords(r'\[cmd\](.*?)\[/cmd\]', reply_msg)
                                         
-                                        json_msg = extract_json_from_markdown(reply_msg)
-                                        if json_msg:
-                                            reply_msg = json_msg["info"]["msg"]
+                                        json_msg = fix_json(reply_msg)
+                                        reply_msg = json_msg["info"]["msg"]
 
                                         if "bye" in bot_commands:
                                             if is_group_chat and "aichat_nobye" not in work_jobs:

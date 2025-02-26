@@ -63,6 +63,7 @@ if use_backup:
         login_info = json.load(f)
 
 ai_prompt = login_info.get("ai_prompt", None)
+login_info["ai_prompt"] = None
 if ai_prompt is not None and ai_prompt != "":
     with open(f_intro_txt, "w", encoding='utf-8') as f: # What kind of person will AI simulate?
         f.write(ai_prompt)

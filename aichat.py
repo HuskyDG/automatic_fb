@@ -1000,7 +1000,7 @@ try:
                                                 try:
                                                     for _x in range(5):
                                                         try:
-                                                            image_link = get_random_image_link(img_keyword, 40, adult)
+                                                            image_link = get_random_image_link(img_keyword, 30, adult)
                                                             image_io = download_image_to_bytesio(image_link)
                                                         except:
                                                             continue

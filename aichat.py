@@ -260,6 +260,7 @@ try:
     last_reload_ts_mapping = {
         chat_tab : 0,
         rqchat_tab : 0,
+        friend_tab : 0,
     }
 
     while True:
@@ -293,24 +294,23 @@ try:
             time.sleep(0.5)
             if "friends" in work_jobs:
                 driver.switch_to.window(friend_tab)
-                if base_url_with_path(driver.current_url) != "www.facebook.com/friends":
+                if base_url_with_path(driver.current_url) != "www.facebook.com/friends" or (int(time.time()) - last_reload_ts_mapping.get(friend_tab, 0)) > 60*5:
+                    last_reload_ts_mapping[friend_tab] = int(time.time())
                     driver.get("https://www.facebook.com/friends")
-                inject_reload(driver)
-
-                try:
-                    for button in driver.find_elements(By.CSS_SELECTOR, 'div[aria-label="Xác nhận"]'):
-                        print_with_time("Chấp nhận kết bạn")
-                        driver.execute_script("arguments[0].click();", button)
-                        time.sleep(1)
-                except Exception:
-                    pass
-                try:
-                    for button in driver.find_elements(By.CSS_SELECTOR, 'div[aria-label="Xóa"]'):
-                        print_with_time("Xóa kết bạn")
-                        driver.execute_script("arguments[0].click();", button)
-                        time.sleep(1)
-                except Exception:
-                    pass
+                    try:
+                        for button in driver.find_elements(By.CSS_SELECTOR, 'div[aria-label="Xác nhận"]'):
+                            print_with_time("Chấp nhận kết bạn")
+                            driver.execute_script("arguments[0].click();", button)
+                            time.sleep(1)
+                    except Exception:
+                        pass
+                    try:
+                        for button in driver.find_elements(By.CSS_SELECTOR, 'div[aria-label="Xóa"]'):
+                            print_with_time("Xóa kết bạn")
+                            driver.execute_script("arguments[0].click();", button)
+                            time.sleep(1)
+                    except Exception:
+                        pass
 
             if "autolike" in work_jobs or "keeponline" in work_jobs:
                 driver.switch_to.window(worker_tab)

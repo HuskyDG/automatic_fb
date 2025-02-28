@@ -385,9 +385,16 @@ try:
                 chat_btns = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"]')
                 for chat_btn in chat_btns:
                     try:
-                        chat_btn.find_element(By.CSS_SELECTOR, 'span.x6s0dn4.xzolkzo.x12go9s9.x1rnf11y.xprq8jg.x9f619.x3nfvp2.xl56j7k.x1spa7qu.x1kpxq89.xsmyaan')
+                        new_chat_indicator = chat_btn.find_elements(By.CSS_SELECTOR, 'span.x6s0dn4.xzolkzo.x12go9s9.x1rnf11y.xprq8jg.x9f619.x3nfvp2.xl56j7k.x1spa7qu.x1kpxq89.xsmyaan')
+                        
+                        href = chat_btn.get_attribute("href")
+                        path_parts = href.rstrip("/").split("/")
+                        message_id = path_parts[-1] if len(path_parts) > 1 else "0"
+                        
+                        if len(new_chat_indicator) <= 0 and chat_histories.get(message_id, None):
+                            continue
                         chat_name = chat_btn.find_element(By.CSS_SELECTOR, 'span.x1lliihq.x6ikm8r.x10wlt62.x1n2onr6.xlyipyv.xuxw1ft').text
-                        chat_list.append({ "href" : chat_btn.get_attribute("href"), "name" : chat_name })
+                        chat_list.append({ "href" : href, "name" : chat_name })
                     except Exception:
                         continue
 
@@ -416,6 +423,8 @@ try:
 
                         driver.execute_script("arguments[0].click();", chat_btn)
                         time.sleep(1)
+                        if not chat_histories.get(message_id, None):
+                            chat_histories[message_id] = [{"message_type" : "new_chat", "info" : "You are now connected on Messenger"}]
                         
                         # Wait until box is visible
                         try:

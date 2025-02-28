@@ -986,6 +986,7 @@ try:
                                             caption = response.text
                                     if caption is not None:
                                         img_search = {}
+                                        is_image_dropped = False
                                         reply_msg, img_search["on"] = extract_keywords(r'\[image\](.*?)\[/image\]', caption)
                                         if work_jobs["aichat"] == "devmode":
                                             reply_msg, img_search["off"] = extract_keywords(r'\[adultimg\](.*?)\[/adultimg\]', reply_msg)
@@ -1015,10 +1016,12 @@ try:
                                                             continue
                                                         print_with_time(f"AI gửi ảnh {img_keyword} từ: {image_link}")
                                                         drop_image(driver, button, image_io)
-                                                        get_message_input().send_keys("\n") # Press Enter to send image
+                                                        is_image_dropped = True
                                                         break
                                                 except:
                                                     print_with_time(f"Không thể gửi ảnh: {img_keyword}")
+                                        if is_image_dropped:
+                                            get_message_input().send_keys("\n") # Press Enter to send image
                                         time.sleep(0.5)
                                         print_with_time("AI Trả lời:", reply_msg)
                                         get_message_input().send_keys(remove_non_bmp_characters(replace_emoji_with_shortcut(reply_msg) + "\n"))

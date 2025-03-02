@@ -586,6 +586,15 @@ try:
                                 return result
                                 
                             chat_history = chat_histories.get(message_id, [])
+                            old_chat_history = chat_histories.get(facebook_id, []) if message_id != facebook_id else []
+                            # The conversation might have been upgraded to end-to-end encryption
+                            # We update it from old unencrypted chat to encrypted one
+                            if message_id != facebook_id and len(old_chat_history) > 0:
+                                old_chat_history = chat_histories.pop(facebook_id, [])
+                                old_chat_history.extend(chat_history)
+                                chat_history = old_chat_history
+                                chat_histories[message_id] = chat_history
+
                             chat_history_new = []
 
                             header_prompt = get_header_prompt(get_day_and_time(), who_chatted, facebook_info)

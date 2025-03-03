@@ -393,7 +393,7 @@ try:
                         
                         if len(new_chat_indicator) <= 0 and ("aichat_no_welcome" in work_jobs or chat_histories.get(message_id, None)):
                             continue
-                        chat_name = chat_btn.find_element(By.CSS_SELECTOR, 'span.x1lliihq.x6ikm8r.x10wlt62.x1n2onr6.xlyipyv.xuxw1ft').text
+                        chat_name = chat_btn.find_element(By.CSS_SELECTOR, 'span[dir="auto"]').text
                         chat_list.append({ "href" : href, "name" : chat_name })
                     except Exception:
                         continue

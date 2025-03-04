@@ -990,7 +990,7 @@ try:
                                         ),)
                                         if not response.candidates:
                                             chat_history = [{"message_type" : "summary_old_chat", "info" : "The previous conversation has been deleted"}]
-                                            caption = "(y)"
+                                            caption = json.dumps({"info" : {"msg" : "(y)"}}, indent = 4, ensure_ascii=False)
                                         else:
                                             caption = response.text
                                     if caption is not None:
@@ -1035,18 +1035,21 @@ try:
                                         print_with_time("AI Trả lời:", reply_msg)
                                         get_message_input().send_keys(remove_non_bmp_characters(replace_emoji_with_shortcut(reply_msg) + "\n"))
 
-                                    chat_history.append({"message_type" : "your_text_message", "info" : {"name" : myname, "msg" : caption}, "mentioned_message" : None })
+                                    chat_history.append({"message_type" : "your_text_message", "info" : {"name" : myname, "msg" : reply_msg}, "mentioned_message" : None })
                                     chat_histories[message_id] = chat_history
                                     time.sleep(2)
                                     break
                                 except NoSuchElementException:
                                     print_with_time("Không thể trả lời")
                                     break
-                                except Exception as e:
-                                    print_with_time("Thử lại:", _x + 1)
+                                except json.JSONDecodeError as e:
+                                    caption = None
                                     print_with_time(e)
-                                    time.sleep(2)
-                                    continue
+                                except Exception as e:
+                                    print_with_time(e)
+                                    pass
+                                print_with_time("Thử lại:", _x + 1)
+                                time.sleep(2)
                             driver.back()
                             break
                         except StaleElementReferenceException:

@@ -328,3 +328,18 @@ def get_mine_type(filename):
     mime_type, _ = mimetypes.guess_type(filename)
     # Return the extension and MIME type
     return ext, mime_type if mime_type else "application/octet-stream"
+
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.remote.webelement import WebElement
+
+def send_keys_long_text(element: WebElement, text: str):
+    """
+    Sends a long text to a web element, replacing \n with Shift + Enter, except for the last segment.
+    :param element: Selenium WebElement where text should be entered.
+    :param text: The text to be typed, where \n represents a new line.
+    """
+    parts = text.split("\n")
+    for i, part in enumerate(parts):
+        element.send_keys(part)
+        if i < len(parts) - 1:
+            element.send_keys(Keys.SHIFT, Keys.ENTER)

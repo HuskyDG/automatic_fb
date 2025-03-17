@@ -1050,7 +1050,8 @@ try:
                                             get_message_input().send_keys("\n") # Press Enter to send image
                                         time.sleep(0.5)
                                         print_with_time("AI Trả lời:", reply_msg)
-                                        get_message_input().send_keys(remove_non_bmp_characters(replace_emoji_with_shortcut(reply_msg) + "\n"))
+                                        send_keys_long_text(get_message_input(), remove_non_bmp_characters(replace_emoji_with_shortcut(reply_msg)))
+                                        get_message_input().send_keys("\n")
 
                                     chat_history.append({"message_type" : "your_text_message", "info" : {"name" : myname, "msg" : reply_msg}, "mentioned_message" : None })
                                     chat_histories[message_id] = chat_history

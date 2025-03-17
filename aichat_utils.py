@@ -343,3 +343,8 @@ def send_keys_long_text(element: WebElement, text: str):
         element.send_keys(part)
         if i < len(parts) - 1:
             element.send_keys(Keys.SHIFT, Keys.ENTER)
+
+import hashlib
+
+def hash_dict(d):
+    return hashlib.sha256(str(sorted(d.items())).encode()).hexdigest()

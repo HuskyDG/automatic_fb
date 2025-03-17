@@ -176,6 +176,7 @@ try:
     chat_histories = pickle_from_file(f_chat_history, {})
     if chat_histories.get("status", None) is None:
         chat_histories["status"] = {}
+    chat_histories_prev_hash = hash_dict(chat_histories)
 
     self_facebook_info = pickle_from_file(f_self_facebook_info, { "Facebook name" : myname, "Facebook url" :  driver.current_url })
     
@@ -263,6 +264,10 @@ try:
     }
 
     def backup_chat_memories():
+        global chat_histories_prev_hash
+        if chat_histories_prev_hash == hash_dict(chat_histories):
+            return
+        chat_histories_prev_hash = hash_dict(chat_histories)
         upload_file(GITHUB_TOKEN, GITHUB_REPO, f_facebook_infos, STORAGE_BRANCE)
         if os.path.exists("files"):
             branch = upload_file(GITHUB_TOKEN, GITHUB_REPO, "files", generate_hidden_branch())

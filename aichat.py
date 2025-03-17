@@ -351,7 +351,7 @@ try:
 
             if "aichat" in work_jobs:
                 driver.switch_to.window(next_chat_tab)
-                if base_url_with_path(driver.current_url) != next_chat_url or (int(time.time()) - last_reload_ts_mapping.get(next_chat_tab, 0)) > 60*5:
+                if (int(time.time()) - last_reload_ts_mapping.get(next_chat_tab, 0)) > 60*5:
                     print_with_time("Tải lại trang messenger...")
                     driver.get(f"https://{next_chat_url}")
                     last_reload_ts_mapping[next_chat_tab] = int(time.time())

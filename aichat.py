@@ -263,6 +263,21 @@ try:
         friend_tab : 0,
     }
 
+    def backup_chat_memories():
+        upload_file(GITHUB_TOKEN, GITHUB_REPO, f_facebook_infos, STORAGE_BRANCE)
+        if os.path.exists("files"):
+            branch = upload_file(GITHUB_TOKEN, GITHUB_REPO, "files", generate_hidden_branch())
+            for msg_id, chat_history in chat_histories.items():
+                if msg_id == "status":
+                    continue
+                for msg in chat_history:
+                    if msg["message_type"] == "file" and msg["info"]["url"] == None:
+                        # Update url of file
+                        msg["info"]["url"] = f'https://raw.githubusercontent.com/{GITHUB_REPO}/{branch}/{msg["info"]["file_name"]}'
+        # Backup chat_histories
+        pickle_to_file(f_chat_history + ".enc", chat_histories, encrypt_key)
+        upload_file(GITHUB_TOKEN, GITHUB_REPO, f_chat_history + ".enc", STORAGE_BRANCE)
+
     while True:
         try:
             if base_url_with_path(driver.current_url).startswith("www.facebook.com/checkpoint/"):
@@ -355,6 +370,8 @@ try:
                     print_with_time("Tải lại trang messenger...")
                     driver.get(f"https://{next_chat_url}")
                     last_reload_ts_mapping[next_chat_tab] = int(time.time())
+                    if next_chat_tab == chat_tab:
+                        backup_chat_memories()
                 try:
                     if len(onetimecode) >= 6:
                         otc_input = driver.find_element(By.CSS_SELECTOR, 'input[autocomplete="one-time-code"]')
@@ -1074,19 +1091,7 @@ try:
                 next_chat_url = chat_tab_mapping[next_chat_tab]
 
     if if_running_on_github_workflows:
-        upload_file(GITHUB_TOKEN, GITHUB_REPO, f_facebook_infos, STORAGE_BRANCE)
-        if os.path.exists("files"):
-            branch = upload_file(GITHUB_TOKEN, GITHUB_REPO, "files", generate_hidden_branch())
-            for msg_id, chat_history in chat_histories.items():
-                if msg_id == "status":
-                    continue
-                for msg in chat_history:
-                    if msg["message_type"] == "file" and msg["info"]["url"] == None:
-                        # Update url of file
-                        msg["info"]["url"] = f'https://raw.githubusercontent.com/{GITHUB_REPO}/{branch}/{msg["info"]["file_name"]}'
-        # Backup chat_histories
-        pickle_to_file(f_chat_history + ".enc", chat_histories, encrypt_key)
-        upload_file(GITHUB_TOKEN, GITHUB_REPO, f_chat_history + ".enc", STORAGE_BRANCE)
+        backup_chat_memories()
  
 finally:
     driver.quit()

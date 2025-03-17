@@ -963,7 +963,7 @@ try:
                                                 __num_file += 1  # Increment first
                                                 msg["info"]["loaded"] = __num_file <= max_file  # Compare after incrementing
                                     prompt_to_summary = process_chat_history(chat_history[:summary_lines])
-                                    prompt_to_summary.append(">> Tell me information about this chat conversation in English, direct, unquoted and no markdown")
+                                    prompt_to_summary.append(">> You are entering the chat summarization phase to optimize memory usage while maintaining a natural conversational flow. Your task is to summarize the following conversation as if you were recalling past messages naturally. Tell me key information about this chat conversation, including all previous summaries, and retain important details for future reference. The summary should be in English, direct, unquoted, and without markdown.")
                                     response = model.generate_content(prompt_to_summary)
                                     if not response.candidates:
                                         caption = "Old chat conversation is deleted"

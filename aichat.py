@@ -1071,17 +1071,18 @@ try:
                                     pass
                                 print_with_time("Thử lại:", _x + 1)
                                 time.sleep(2)
-                            new_msg_button = driver.find_elements(By.CSS_SELECTOR, 'a[href="/messages/new/"]')
-                            if len(new_msg_button) > 0:
-                                driver.execute_script("arguments[0].click();", new_msg_button[0])
-                            else:
-                                driver.back()
                             break
                         except StaleElementReferenceException:
                             pass
                         except Exception as e:
                             print_with_time(e)
                             break
+
+                new_msg_button = driver.find_elements(By.CSS_SELECTOR, 'a[href="/messages/new/"]')
+                if len(new_msg_button) > 0:
+                    driver.execute_script("arguments[0].click();", new_msg_button[0])
+                else:
+                    driver.back()
         except Exception as e:
             print_with_time(e)
         finally:

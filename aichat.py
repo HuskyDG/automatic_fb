@@ -1045,12 +1045,17 @@ try:
                                                             continue
                                                         print_with_time(f"AI gửi ảnh {img_keyword} từ: {image_link}")
                                                         drop_image(driver, button, image_io)
+                                                        image_hashcode = md5(image_io.getvalue()).hexdigest()
+                                                        image_name = f"files/{image_hashcode}"
+                                                        image_name = image_name[:40]
+                                                        chat_history.append({"message_type" : "file", "info" : {"name" : myname, "msg" : "you send an image", "keyword" : img_keyword, "file_name" : image_name, "mime_type" : "image/jpeg" , "url" : image_link, "loaded" : True }})
                                                         is_image_dropped = True
                                                         break
                                                 except:
                                                     print_with_time(f"Không thể gửi ảnh: {img_keyword}")
                                         if is_image_dropped:
                                             get_message_input().send_keys("\n") # Press Enter to send image
+                                            time.sleep(1)
                                         time.sleep(0.5)
                                         print_with_time("AI Trả lời:", reply_msg)
                                         send_keys_long_text(get_message_input(), remove_non_bmp_characters(replace_emoji_with_shortcut(reply_msg)))

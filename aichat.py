@@ -396,11 +396,6 @@ try:
                 except Exception:
                     pass
 
-                pressed_chat = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"][aria-current="page"]')
-                if len(pressed_chat) > 0: # There should be no chat is pressed
-                    last_reload_ts_mapping[next_chat_tab] = 0 # reload to fix
-                    continue
-
                 chat_list = []
                 # find all chat buttons
                 chat_btns = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"]')

@@ -521,7 +521,8 @@ try:
                                     upload_file(GITHUB_TOKEN, GITHUB_REPO, f_facebook_infos, STORAGE_BRANCE)
                             else:
                                 is_group_chat = True
-                                who_chatted = chat_info["name"]
+                                group_name = main.find_elements(By.CSS_SELECTOR, "h2")
+                                who_chatted = group_name[0].text if len(group_name) > 0 else chat_info["name"]
                                 facebook_info = { "Facebook group name" : who_chatted, "Facebook url" :  driver.current_url }
 
                             parsed_url = urlparse(facebook_info.get("Facebook url", None))

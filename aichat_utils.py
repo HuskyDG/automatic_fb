@@ -4,6 +4,8 @@ import pyotp  # For generating TOTP (Time-based One-Time Passwords)
 from selenium.webdriver.support.ui import WebDriverWait  # For waiting for elements in Selenium
 import base64
 from io import BytesIO
+import mimetypes
+import os
 
 def get_instructions_prompt(myname, ai_prompt, self_facebook_info, rules_prompt, devmode):
     instructions = [
@@ -178,25 +180,36 @@ from PIL import Image
 import time
 import requests
 
-def image_to_base64(image_bytesio):
-    """ Convert BytesIO image to Base64 string """
+def get_extension(mimetype):
+    extension = mimetypes.guess_extension(mimetype)
+    return extension if extension else ".bin"
+
+def bytesio_to_base64(sample_bytesio):
+    """ Convert BytesIO into to Base64 string """
+    return base64.b64encode(sample_bytesio.getvalue()).decode()
+
+def image_to_png(image_bytesio):
     image = Image.open(image_bytesio)
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")  # Convert to PNG format
-    return base64.b64encode(buffered.getvalue()).decode()
+    return buffered
 
-def download_image_to_bytesio(image_link):
-    """ Download an image from a URL and return it as a BytesIO object """
-    response = requests.get(image_link)
+def download_file_to_bytesio(file_link):
+    """Tải file từ URL về BytesIO, kiểm tra MIME type"""
+    response = requests.get(file_link, stream=True)
     if response.status_code != 200:
-        raise Exception(f"Failed to download image: {image_link}")
+        raise Exception(f"Không tải được file từ: {file_link}")
+    content_type = response.headers.get("Content-Type", "application/octet-stream")
+    if "text/html" in content_type:
+        raise Exception("File tải về không hợp lệ (có thể là trang lỗi HTML).")
     return io.BytesIO(response.content)
 
-def drop_image(driver, element, image_bytesio):
+def drop_file(driver, element, sample_bytesio, mimetype):
     """Drop a BytesIO image into a web element using JavaScript"""
-    base64_image = image_to_base64(image_bytesio)
+    base64_data = bytesio_to_base64(sample_bytesio)
+    filename = f"file{get_extension(mimetype)}" 
     js_script = """
-    async function dropBase64Image(base64Data, dropTarget, callback) {
+    async function dropBase64Image(base64Data, dropTarget, filename, mimetype, callback) {
         try {
             const byteCharacters = atob(base64Data);
             const byteNumbers = new Array(byteCharacters.length);
@@ -206,8 +219,8 @@ def drop_image(driver, element, image_bytesio):
             }
             
             const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray], { type: 'image/png' });
-            const file = new File([blob], 'image.png', { type: 'image/png' });
+            const blob = new Blob([byteArray], { type: mimetype });
+            const file = new File([blob], filename, { type: mimetype });
 
             const dt = new DataTransfer();
             dt.items.add(file);
@@ -221,9 +234,12 @@ def drop_image(driver, element, image_bytesio):
         }
     }
 
-    dropBase64Image(arguments[0], arguments[1], arguments[2]);
+    dropBase64Image(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);
     """
-    driver.execute_async_script(js_script, base64_image, element)
+    driver.execute_async_script(js_script, base64_data, element, filename, mimetype)
+
+def drop_image(driver, element, image_bytesio):
+    return drop_file(driver, element, image_to_png(image_bytesio), "image/png")
 
 import re
 
@@ -302,15 +318,12 @@ def get_random_image_link(keyword, get=10, adult="on"):
     
     return random.choice(img_links) if img_links else None
 
-import mimetypes
-import os
-
 def check_supported_file(mime_type):
     # List of supported MIME types for Google Vertex AI
     supported_mime_types = [
         "text/plain", "text/html", "application/json",  # Text files
         "image/jpeg", "image/png", "image/gif", "image/webp",  # Image files
-        "audio/mpeg", "audio/wav", "audio/ogg",  # Audio files
+        "audio/mpeg", "audio/wav", "audio/ogg", "audio/mp4",  # Audio files
         "video/mp4", "video/webm",  # Video files
         "application/pdf",  # PDF files
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",  # Word (DOCX)
@@ -348,3 +361,5 @@ import hashlib
 
 def hash_dict(d):
     return hashlib.sha256(str(sorted(d.items())).encode()).hexdigest()
+
+from search_itunes import search_music_itunes

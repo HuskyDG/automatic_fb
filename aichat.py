@@ -70,7 +70,8 @@ rules_prompt = """
 - In group chats, you can end the conversation — such as when saying goodbye, going offline, or leaving the group — by including [cmd]bye[/cmd] in your message.
 - To send the normal images, add one or more [image]keywords or image description[/image] into your message (Maximum 4 images).
 - To send the sexually explicit images, add one or more [adultimg]sexually explicit keywords or image description[/adultimg] into your message (Maximum 4 images).
-- To avoid distracting the conversation, limit sending photos when not necessary. Do not send sexually explicit images unless explicitly requested by someone!
+- To send music from itunes, add one or more [itunes]music name[/itunes] into your message
+- To avoid distracting the conversation, limit sending photos, music or any media when not necessary. Do not send sexually explicit images unless explicitly requested by someone!
 - Provide only the response content without introductory phrases or multiple options.
 """
 
@@ -1018,6 +1019,7 @@ try:
                                         else:
                                             reply_msg, _img_search = extract_keywords(r'\[adultimg\](.*?)\[/adultimg\]', reply_msg)
                                             img_search["on"].extend(_img_search)
+                                        reply_msg, itunes_keywords = extract_keywords(r'\[itunes\](.*?)\[/itunes\]', reply_msg)
                                         reply_msg, bot_commands = extract_keywords(r'\[cmd\](.*?)\[/cmd\]', reply_msg)
                                         
                                         json_msg = fix_json(reply_msg)
@@ -1036,7 +1038,7 @@ try:
                                                     for _x in range(5):
                                                         try:
                                                             image_link = get_random_image_link(img_keyword, 30, adult)
-                                                            image_io = download_image_to_bytesio(image_link)
+                                                            image_io = download_file_to_bytesio(image_link)
                                                         except:
                                                             continue
                                                         print_with_time(f"AI gửi ảnh {img_keyword} từ: {image_link}")
@@ -1044,13 +1046,43 @@ try:
                                                         image_hashcode = md5(image_io.getvalue()).hexdigest()
                                                         image_name = f"files/{image_hashcode}"
                                                         image_name = image_name[:40]
-                                                        chat_history.append({"message_type" : "file", "info" : {"name" : myname, "msg" : "you send an image", "keyword" : img_keyword, "file_name" : image_name, "mime_type" : "image/jpeg" , "url" : image_link, "loaded" : True }})
+                                                        chat_history.append({"message_type" : "file", "info" : {"name" : myname, "msg" : "send image", "keyword" : img_keyword, "file_name" : image_name, "mime_type" : "image/jpeg" , "url" : image_link, "loaded" : True }})
                                                         is_image_dropped = True
                                                         break
                                                 except:
                                                     print_with_time(f"Không thể gửi ảnh: {img_keyword}")
                                         if is_image_dropped:
                                             get_message_input().send_keys("\n") # Press Enter to send image
+                                            time.sleep(1)
+                                        is_image_dropped = False
+                                        for itunes_keyword in itunes_keywords:
+                                            try:
+                                                for _x in range(5):
+                                                    music_io = None
+                                                    try:
+                                                        itunes_link = search_music_itunes(itunes_keyword, 1)
+                                                        if len(itunes_link) == 0:
+                                                            break
+                                                        itunes_link = itunes_link[0].get("preview_url", None)
+                                                        if not itunes_link:
+                                                            break
+                                                        music_io = download_file_to_bytesio(itunes_link)
+                                                    except:
+                                                        continue
+                                                    if music_io is None:
+                                                        raise Exception("No music")
+                                                    print_with_time(f"AI gửi nhạc {itunes_keyword} từ: {itunes_link}")
+                                                    drop_file(driver, button, music_io, "audio/mp4")
+                                                    file_hashcode = md5(music_io.getvalue()).hexdigest()
+                                                    file_name = f"files/{file_hashcode}"
+                                                    file_name = file_name[:40]
+                                                    chat_history.append({"message_type" : "file", "info" : {"name" : myname, "msg" : "send file", "keyword" : itunes_keyword, "file_name" : file_name, "mime_type" : "audio/mp4" , "url" : itunes_link, "loaded" : False }})
+                                                    is_image_dropped = True
+                                                    break
+                                            except:
+                                                print_with_time(f"Không thể gửi nhạc: {itunes_keyword}")
+                                        if is_image_dropped:
+                                            get_message_input().send_keys("\n") # Press Enter to send music
                                             time.sleep(1)
                                         time.sleep(0.5)
                                         print_with_time("AI Trả lời:", reply_msg)

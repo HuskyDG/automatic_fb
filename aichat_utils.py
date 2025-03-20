@@ -363,3 +363,18 @@ def hash_dict(d):
     return hashlib.sha256(str(sorted(d.items())).encode()).hexdigest()
 
 from search_itunes import search_music_itunes
+
+import string
+
+def generate_random_string(length=12):
+    """
+    Generate a random string with lowercase letters and numbers,
+    using the current Unix timestamp as the seed.
+    
+    :param length: Length of the string (default: 12)
+    :return: Randomly generated string
+    """
+    seed = int(time.time() * 1000)  # Get the current Unix timestamp
+    random.seed(seed)  # Set the seed for reproducibility
+    characters = string.ascii_lowercase + string.digits  # a-z, 0-9
+    return ''.join(random.choices(characters, k=length))

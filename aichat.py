@@ -588,13 +588,16 @@ try:
                                         file_name = msg["info"]["file_name"]
                                         mime_type = msg["info"]["mime_type"]
                                         try:
+                                            # find the cached files first
                                             file_upload = genai.get_file(file_name)
                                         except Exception:
                                             try:
                                                 if msg["info"].get("url", None) is not None:
-                                                    get_raw_file(msg["info"]["url"], msg["info"]["file_name"])
+                                                    # generate new file name if possible to avoid any conflict
+                                                    file_name = f"files/{generate_random_string(40)}"
+                                                    msg["info"]["file_name"] = file_name
+                                                    get_raw_file(msg["info"]["url"], file_name)
                                                 file_upload = genai.upload_file(path = file_name, mime_type = mime_type, name = file_name)
-                                                continue
                                             except Exception as e:
                                                 result.append(f"{file_name} cannot be loaded")
                                                 print_with_time(e)
@@ -760,10 +763,7 @@ try:
                                             else:
                                                 image_data = requests.get(data_uri).content
                                                 _url = data_uri
-
-                                            image_hashcode = md5(image_data).hexdigest()
-                                            image_name = f"files/{image_hashcode}"
-                                            image_name = image_name[:40]
+                                            image_name = f"files/{generate_random_string(40)}"
                                             os.makedirs(os.path.dirname(image_name), exist_ok=True)
                                             # Use BytesIO to create a file-like object for the image
                                             image_file = BytesIO(image_data)
@@ -779,9 +779,7 @@ try:
                                     video_element = msg_element.find_element(By.CSS_SELECTOR, 'video')
                                     video_url = video_element.get_attribute("src")
                                     video_data = get_file_data(driver, video_url)
-                                    video_hashcode = md5(video_data).hexdigest()
-                                    video_name = f"files/{video_hashcode}"
-                                    video_name = video_name[:40]
+                                    video_name = f"files/{generate_random_string(40)}"
                                     os.makedirs(os.path.dirname(video_name), exist_ok=True)
                                     video_file = BytesIO(video_data)
                                     bytesio_to_file(video_file, video_name)
@@ -798,10 +796,7 @@ try:
                                     file_ext, mime_type = get_mine_type(file_down_name)
                                     if check_supported_file(mime_type):
                                         file_data = get_file_data(driver, file_url)
-                                        file_hashcode = md5(file_data).hexdigest()
-                                        file_name = f"files/{file_hashcode}"
-                                        file_name = file_name[:40]
-                                        
+                                        file_name = f"files/{generate_random_string(40)}"
                                         os.makedirs(os.path.dirname(file_name), exist_ok=True)
                                         file_file = BytesIO(file_data)
                                         bytesio_to_file(file_file, file_name)
@@ -1043,9 +1038,7 @@ try:
                                                             continue
                                                         print_with_time(f"AI gửi ảnh {img_keyword} từ: {image_link}")
                                                         drop_image(driver, button, image_io)
-                                                        image_hashcode = md5(image_io.getvalue()).hexdigest()
-                                                        image_name = f"files/{image_hashcode}"
-                                                        image_name = image_name[:40]
+                                                        image_name = f"files/{generate_random_string(40)}"
                                                         chat_history.append({"message_type" : "file", "info" : {"name" : myname, "msg" : "send image", "keyword" : img_keyword, "file_name" : image_name, "mime_type" : "image/jpeg" , "url" : image_link, "loaded" : True }})
                                                         is_image_dropped = True
                                                         break
@@ -1073,9 +1066,7 @@ try:
                                                         raise Exception("No music")
                                                     print_with_time(f"AI gửi nhạc {itunes_keyword} từ: {itunes_link}")
                                                     drop_file(driver, button, music_io, "audio/mp4")
-                                                    file_hashcode = md5(music_io.getvalue()).hexdigest()
-                                                    file_name = f"files/{file_hashcode}"
-                                                    file_name = file_name[:40]
+                                                    file_name = f"files/{generate_random_string(40)}"
                                                     chat_history.append({"message_type" : "file", "info" : {"name" : myname, "msg" : "send file", "keyword" : itunes_keyword, "file_name" : file_name, "mime_type" : "audio/mp4" , "url" : itunes_link, "loaded" : False }})
                                                     is_image_dropped = True
                                                     break

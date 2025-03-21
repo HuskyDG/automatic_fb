@@ -559,14 +559,6 @@ try:
                             except Exception as e:
                                 print_with_time("Không thể tải đoạn chat")
                                 break
-                            try:
-                                msg_scroller = msg_table.find_element(By.CSS_SELECTOR, 'div[role="none"]')
-                                #for _x in range(30):
-                                #    # Scroll to the top of the message scroller
-                                #    driver.execute_script("arguments[0].scrollTop = 0;", msg_scroller)
-                                #    time.sleep(0.1)
-                            except Exception:
-                                msg_scroller = None
 
                             time.sleep(1)
 
@@ -657,33 +649,7 @@ try:
                                     start_regex_list[start_regex] = start_msg
                                     
                                     bye_msg_list.append(work_jobs.get(f"aichat_{name}_byemsg", None))
-                            
-                            for _x in range(3):
-                                stop = False
-                                for msg_element in reversed(msg_table.find_elements(By.CSS_SELECTOR, 'div[role="row"]:not([__read])')):
-                                    try: 
-                                        msg_element.find_element(By.CSS_SELECTOR, 'div[class="html-div xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp x11i5rnm x12nagc x1mh8g0r x1yc453h x126k92a xyk4ms5"]').text
-                                        # our msg, at this point we should shop reading if we cached previous one
-                                        stop = True
-                                    except:
-                                        pass
-                                    driver.execute_script('arguments[0].setAttribute("__read", "yes");', msg_element)
-                                if stop:
-                                    break
-                                driver.execute_script("""
-                                        var divs = document.querySelectorAll('div.x78zum5.xdt5ytf[data-virtualized="false"], div.x78zum5.xdt5ytf[data-virtualized="true"]');
-                                        divs.forEach(function(div) {
-                                            var disabledDiv = document.createElement('disabled-div');
-                                            disabledDiv.innerHTML = div.innerHTML;  // Keep the content inside
-                                            div.parentNode.replaceChild(disabledDiv, div);  // Replace the div with the custom tag
-                                        });
-                                    """)
-                                if not msg_scroller:
-                                    break
-                                driver.execute_script("arguments[0].scrollTop = 0;", msg_scroller)
-                                time.sleep(0.1)
-                            if msg_scroller:
-                                driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight;", msg_scroller)
+
                             driver.execute_script("""
                                 window.last_play_src = null;
                                 HTMLMediaElement.prototype.play = function() {

@@ -401,6 +401,10 @@ try:
                 except Exception:
                     pass
 
+                def get_last_part(path):
+                    path_parts = path.rstrip("/").split("/")
+                    return path_parts[-1] if len(path_parts) > 1 else "0"
+
                 chat_list = []
                 # find all chat buttons
                 chat_btns = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"]')
@@ -409,8 +413,7 @@ try:
                         new_chat_indicator = chat_btn.find_elements(By.CSS_SELECTOR, 'span.x6s0dn4.xzolkzo.x12go9s9.x1rnf11y.xprq8jg.x9f619.x3nfvp2.xl56j7k.x1spa7qu.x1kpxq89.xsmyaan')
                         
                         href = chat_btn.get_attribute("href")
-                        path_parts = href.rstrip("/").split("/")
-                        message_id = path_parts[-1] if len(path_parts) > 1 else "0"
+                        message_id = get_last_part(href)
                         
                         if len(new_chat_indicator) <= 0 and ("aichat_no_welcome" in work_jobs or chat_histories.get(message_id, None)):
                             continue
@@ -436,7 +439,7 @@ try:
                         chat_selector = chat_button_selector[next_chat_tab]
                         chat_btns = driver.find_elements(*chat_selector)
                         for btn in chat_btns:
-                            if btn.get_attribute("href") == chat_href:
+                            if get_last_part(btn.get_attribute("href")) == get_last_part(chat_href):
                                 chat_btn = btn
                                 break
 
@@ -533,10 +536,9 @@ try:
 
                             parsed_url = urlparse(facebook_info.get("Facebook url", None))
                             # Remove the trailing slash from the path, if it exists
-                            urlpath = parsed_url.path.rstrip("/")
+                            urlpath = parsed_url.path
                             # Split the path and extract the ID
-                            path_parts = urlpath.split("/")
-                            facebook_id = path_parts[-1] if len(path_parts) > 1 else None
+                            facebook_id = get_last_part(urlpath)
                         except Exception as e:
                             print_with_time(e)
                             continue
@@ -549,13 +551,8 @@ try:
                             print_with_time(json.dumps(facebook_info, ensure_ascii=False, indent=2))
 
                             parsed_url = urlparse(driver.current_url)
-
-                            # Remove the trailing slash from the path, if it exists
-                            urlpath = parsed_url.path.rstrip("/")
-                            
-                            # Split the path and extract the ID
-                            path_parts = urlpath.split("/")
-                            message_id = path_parts[-1] if len(path_parts) > 1 else "0"
+                            urlpath = parsed_url.path
+                            message_id = get_last_part(urlpath)
 
                             time.sleep(1)
                             # Wait until box is visible

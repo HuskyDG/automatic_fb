@@ -687,6 +687,14 @@ try:
                                 time.sleep(0.1)
                             if msg_scroller:
                                 driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight;", msg_scroller)
+                            driver.execute_script("""
+                                window.last_play_src = null;
+                                HTMLMediaElement.prototype.play = function() {
+                                  window.last_play_src = this.src;
+                                  return Promise.resolve(); // Ngăn phát
+                                };
+                            """)
+                            # call driver.execute_script("return window.last_play_src;")
 
                             for msg_element in reversed(msg_table.find_elements(By.CSS_SELECTOR, 'div[role="row"]')):
                                 try:
@@ -785,6 +793,22 @@ try:
                                     bytesio_to_file(video_file, video_name)
 
                                     chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send video", "file_name" : video_name, "mime_type" : "video/mp4", "url" : None, "loaded" : False }, "mentioned_message" : quotes_text})
+                                except Exception:
+                                    pass
+
+                                try:
+                                    audio_element = msg_element.find_element(By.CSS_SELECTOR, 'path[d="M10 25.5v-15a1.5 1.5 0 012.17-1.34l15 7.5a1.5 1.5 0 010 2.68l-15 7.5A1.5 1.5 0 0110 25.5z"]')
+                                    driver.execute_script('arguments[0].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));', audio_element)
+                                    time.sleep(0.2)
+                                    audio_url = driver.execute_script("return window.last_play_src;")
+                                    driver.execute_script("window.last_play_src = null;")
+                                    audio_data = get_file_data(driver, audio_url)
+                                    audio_name = f"files/{generate_random_string(40)}"
+                                    os.makedirs(os.path.dirname(audio_name), exist_ok=True)
+                                    audio_file = BytesIO(audio_data)
+                                    bytesio_to_file(audio_file, audio_name)
+
+                                    chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send audio", "file_name" : audio_name, "mime_type" : "audio/mp4", "url" : None, "loaded" : True }, "mentioned_message" : quotes_text})
                                 except Exception:
                                     pass
 
@@ -1067,7 +1091,7 @@ try:
                                                     print_with_time(f"AI gửi nhạc {itunes_keyword} từ: {itunes_link}")
                                                     drop_file(driver, button, music_io, "audio/mp4")
                                                     file_name = f"files/{generate_random_string(40)}"
-                                                    chat_history.append({"message_type" : "file", "info" : {"name" : myname, "msg" : "send file", "keyword" : itunes_keyword, "file_name" : file_name, "mime_type" : "audio/mp4" , "url" : itunes_link, "loaded" : False }})
+                                                    chat_history.append({"message_type" : "file", "info" : {"name" : myname, "msg" : "send audio", "keyword" : itunes_keyword, "file_name" : file_name, "mime_type" : "audio/mp4" , "url" : itunes_link, "loaded" : False }})
                                                     is_image_dropped = True
                                                     break
                                             except:

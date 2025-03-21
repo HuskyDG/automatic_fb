@@ -265,11 +265,18 @@ def parse_opts_string(input_str):
 import json
 import json5  # More lenient JSON parser
 
+class JSON5DecodeError(ValueError):
+    """Custom exception to mimic json.JSONDecodeError"""
+    pass
+
 def fix_json(gemini_output):
     try:
         return json.loads(gemini_output)  # Try strict parsing
-    except json.JSONDecodeError:
-        return json5.loads(gemini_output)  # Fallback to lenient parsing
+    except json5.JSONDecodeError:
+        try:
+            return json5.loads(gemini_output)  # Fallback to lenient parsing
+        except ValueError as e:
+            raise JSON5DecodeError("JSON5 parsing error") from e
 
 def extract_json_from_markdown(markdown_text):
     """Extracts the first JSON code block from a markdown string."""

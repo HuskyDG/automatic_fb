@@ -1113,7 +1113,7 @@ try:
                                 except NoSuchElementException:
                                     print_with_time("Không thể trả lời")
                                     break
-                                except json.JSONDecodeError as e:
+                                except JSON5DecodeError as e:
                                     caption = None
                                     print_with_time(e)
                                 except Exception as e:

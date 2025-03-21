@@ -263,6 +263,10 @@ try:
         rqchat_tab : 0,
         friend_tab : 0,
     }
+    chat_button_selector = {
+        chat_tab : (By.CSS_SELECTOR, 'a[href^="/messages/e2ee/"]'),
+        rqchat_tab : (By.CSS_SELECTOR, 'a[href^="/messages/requests/"]'),
+    }
 
     def backup_chat_memories():
         global chat_histories_prev_hash
@@ -429,7 +433,8 @@ try:
                         chat_btn = None
 
                         # Relocated button if possible
-                        chat_btns = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/messages/"]')
+                        chat_selector = chat_button_selector[next_chat_tab]
+                        chat_btns = driver.find_elements(*chat_selector)
                         for btn in chat_btns:
                             if btn.get_attribute("href") == chat_href:
                                 chat_btn = btn

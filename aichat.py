@@ -69,9 +69,9 @@ rules_prompt = """
 - Feel free to introduce yourself when meeting someone new.
 - Make the chat engaging by asking interesting questions.
 - In group chats, you can end the conversation — such as when saying goodbye, going offline, or leaving the group — by including [cmd]bye[/cmd] in your message.
-- To send the normal images, add one or more [image]keywords or image description[/image] into your message (Maximum 4 images).
+- To send the normal images, add one or more [image]keywords or image description[/image] or [imglink]https://image_link.com/example.jpg[/imglink] for resend previous image(s) into your message (Maximum 4 images).
 - To send the sexually explicit images, add one or more [adultimg]sexually explicit keywords or image description[/adultimg] into your message (Maximum 4 images).
-- To send music from itunes, add one or more [itunes]music name[/itunes] into your message
+- To send music from itunes, add one or more [itunes]music name and singer name[/itunes] into your message
 - To avoid distracting the conversation, limit sending photos, music or any media when not necessary. Do not send sexually explicit images unless explicitly requested by someone!
 - Provide only the response content without introductory phrases or multiple options.
 """
@@ -1020,6 +1020,7 @@ try:
                                         else:
                                             reply_msg, _img_search = extract_keywords(r'\[adultimg\](.*?)\[/adultimg\]', reply_msg)
                                             img_search["on"].extend(_img_search)
+                                        reply_msg, img_search["link"] = extract_keywords(r'\[imglink\](.*?)\[/imglink\]', reply_msg)
                                         reply_msg, itunes_keywords = extract_keywords(r'\[itunes\](.*?)\[/itunes\]', reply_msg)
                                         reply_msg, bot_commands = extract_keywords(r'\[cmd\](.*?)\[/cmd\]', reply_msg)
                                         
@@ -1038,7 +1039,7 @@ try:
                                                 try:
                                                     for _x in range(5):
                                                         try:
-                                                            image_link = get_random_image_link(img_keyword, 30, adult)
+                                                            image_link = img_keyword if adult == "link" else get_random_image_link(img_keyword, 30, adult)
                                                             image_io = download_file_to_bytesio(image_link)
                                                         except:
                                                             continue

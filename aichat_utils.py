@@ -344,6 +344,8 @@ def check_supported_file(mime_type):
 def get_mine_type(filename):
     # Extract the file extension
     ext = os.path.splitext(filename)[1]
+    # Map .ipynb to application/json
+    mimetypes.add_type('application/json', '.ipynb')
     # Guess the MIME type of the file based on its extension
     mime_type, _ = mimetypes.guess_type(filename)
     # Return the extension and MIME type

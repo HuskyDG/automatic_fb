@@ -238,8 +238,7 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, cooki
                 actions.move_to_element(other_veri_btn).click().perform() # Click on input code
                 time.sleep(random.randint(5,8))
                 print(f"{hide_email(username)}: Đã nhập mã OTP")
-                actions.move_to_element(other_veri_btn).send_keys(generate_otp(otp_secret)).perform() # Type in code on input
-                time.sleep(random.randint(5,8))
+                actions.move_to_element(other_veri_btn).send_keys(generate_otp(otp_secret)).perform()
                 other_veri_btn = find_element_when_clickable_in_list([
                     (By.XPATH, '//span[contains(text(), "Tiếp tục")]'),
                     (By.XPATH, '//span[contains(text(), "Continue")]')

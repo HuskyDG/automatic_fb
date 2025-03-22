@@ -10,6 +10,7 @@ import requests  # For making HTTP requests
 from urllib.parse import urljoin, urlparse  # For URL manipulation
 from hashlib import md5  # For hashing
 import re
+import shutil
 from selenium import webdriver  # For web automation
 from selenium.webdriver.common.by import By  # For locating elements
 from selenium.webdriver.chrome.service import Service  # For Chrome service
@@ -272,6 +273,10 @@ try:
         upload_file(GITHUB_TOKEN, GITHUB_REPO, f_facebook_infos, STORAGE_BRANCE)
         if os.path.exists("files"):
             branch = upload_file(GITHUB_TOKEN, GITHUB_REPO, "files", generate_hidden_branch())
+            try:
+                shutil.rmtree("files") # Destroy directory after upload
+            except:
+                pass # Ignore all error
             for msg_id, chat_history in chat_histories.items():
                 if msg_id == "status":
                     continue
@@ -593,6 +598,18 @@ try:
                                                 continue
                                         result.append(file_upload)
                                 return result
+
+                            def release_unload_files(chat_history, do_all = False):
+                                result = []
+                                for msg in chat_history:
+                                    if msg["message_type"] == "file" and (do_all or msg["info"].get("loaded", False) == False):
+                                        try:
+                                            file_name = msg["info"]["file_name"]
+                                            # find the cached files first
+                                            file_upload = genai.get_file(file_name)
+                                            genai.delete_file(file_upload)
+                                        except:
+                                            pass
                                 
                             chat_history = chat_histories.get(message_id, [])
                             old_chat_history = chat_histories.get(facebook_id, []) if message_id != facebook_id else []
@@ -944,6 +961,7 @@ try:
                                     prompt_to_summary = process_chat_history(chat_history[:summary_lines])
                                     prompt_to_summary.append(">> You are entering the chat summarization phase to optimize memory usage while maintaining a natural conversational flow. Your task is to summarize the following conversation as if you were recalling past messages naturally. Tell me key information about this chat conversation, including all previous summaries, and retain important details for future reference. The summary should be in English, direct, unquoted, and without markdown.")
                                     response = model.generate_content(prompt_to_summary)
+                                    release_unload_files(chat_history[:summary_lines], True)
                                     if not response.candidates:
                                         caption = "Old chat conversation is deleted"
                                     else:
@@ -964,6 +982,7 @@ try:
                                     elif msg["info"]["msg"] == "send file":
                                         num_file += 1  # Increment first
                                         msg["info"]["loaded"] = num_file <= max_file  # Compare after incrementing
+                            #release_unload_files(chat_history)
                             prompt_list.extend(process_chat_history(chat_history))
 
                             if "debug" in work_jobs:

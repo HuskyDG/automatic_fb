@@ -624,6 +624,7 @@ try:
                                 chat_histories[message_id] = chat_history
 
                             chat_history_new = []
+                            files_mapping = {}
 
                             header_prompt = get_header_prompt(get_day_and_time(), who_chatted, facebook_info)
 
@@ -756,8 +757,7 @@ try:
                                             image_name = f"files/{generate_random_string(40)}"
                                             os.makedirs(os.path.dirname(image_name), exist_ok=True)
                                             # Use BytesIO to create a file-like object for the image
-                                            image_file = BytesIO(image_data)
-                                            bytesio_to_file(image_file, image_name)
+                                            files_mapping[image_name] = image_data
                                            
                                             chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send image", "file_name" : image_name, "mime_type" : "image/jpeg" , "url" : _url, "loaded" : True }, "mentioned_message" : quotes_text})
                                         except Exception:
@@ -771,8 +771,7 @@ try:
                                     video_data = get_file_data(driver, video_url)
                                     video_name = f"files/{generate_random_string(40)}"
                                     os.makedirs(os.path.dirname(video_name), exist_ok=True)
-                                    video_file = BytesIO(video_data)
-                                    bytesio_to_file(video_file, video_name)
+                                    files_mapping[video_name] = video_data
 
                                     chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send video", "file_name" : video_name, "mime_type" : "video/mp4", "url" : None, "loaded" : False }, "mentioned_message" : quotes_text})
                                 except Exception:
@@ -787,8 +786,7 @@ try:
                                     audio_data = get_file_data(driver, audio_url)
                                     audio_name = f"files/{generate_random_string(40)}"
                                     os.makedirs(os.path.dirname(audio_name), exist_ok=True)
-                                    audio_file = BytesIO(audio_data)
-                                    bytesio_to_file(audio_file, audio_name)
+                                    files_mapping[audio_name] = audio_data
 
                                     chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send audio", "file_name" : audio_name, "mime_type" : "audio/mp4", "url" : None, "loaded" : True }, "mentioned_message" : quotes_text})
                                 except Exception:
@@ -807,8 +805,7 @@ try:
                                         file_data = get_file_data(driver, file_url)
                                         file_name = f"files/{generate_random_string(40)}"
                                         os.makedirs(os.path.dirname(file_name), exist_ok=True)
-                                        file_file = BytesIO(file_data)
-                                        bytesio_to_file(file_file, file_name)
+                                        files_mapping[file_name] = file_data
                                         chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send file", "file_name" : file_name, "mime_type" : mime_type, "url" : None, "loaded" : False }, "mentioned_message" : quotes_text})
                                     continue
                                 except Exception:
@@ -947,6 +944,10 @@ try:
                                 break
                             if should_not_chat:
                                 break
+
+                            for file_name, file_data in files_mapping.items():
+                                file_object = BytesIO(file_data)
+                                bytesio_to_file(file_object, file_name)
 
                             max_lines = 75
                             summary_lines = 25

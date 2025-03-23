@@ -1122,9 +1122,7 @@ try:
                 if len(new_msg_button) > 0:
                     driver.execute_script("arguments[0].click();", new_msg_button[0])
                 if (int(time.time()) - last_reload_ts_mapping.get(next_chat_tab, 0)) > 60*5:
-                    if backup_chat_memories():
-                        print_with_time("Tải lại trang messenger...")
-                        driver.get(f"https://{next_chat_url}")
+                    backup_chat_memories()
                     last_reload_ts_mapping[next_chat_tab] = int(time.time())
         except Exception as e:
             print_with_time(e)

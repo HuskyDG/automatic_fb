@@ -112,13 +112,15 @@ def check_cookies_(cookies):
     try:
         current_url = get_facebook_profile_url(cookies)
         _url = base_url_with_path(current_url)
-        if _url == "www.facebook.com" or _url == "www.facebook.com/login" or _url.startswith("www.facebook.com/checkpoint/"):
-            return None
+        if _url == "www.facebook.com" or _url == "www.facebook.com/login":
+            return 0
+        if _url.startswith("www.facebook.com/checkpoint/"):
+            return -1
         print("Đăng nhập thành công:", _url)
     except Exception as e:
         print(f"Error: {e}")
-        return None
-    return cookies
+        return 0
+    return 1
 
 
 def check_cookies(filename=None):
@@ -130,11 +132,11 @@ def check_cookies(filename=None):
         return check_cookies_(cookies), cookies
     except Exception as e:
         print(f"Error loading cookies from file: {e}")
-        return None, cookies
+        return 0, cookies
 
 def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, cookies = None, incognito = False, finally_stop = False):
     if password is None or password == "":
-        return None
+        return 0, None
     try:
         scoped_dir = os.getenv("SCPDIR")
         driver = __chrome_driver__(scoped_dir, False, incognito)
@@ -291,13 +293,17 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, cooki
             input("<< Nhấn Enter để tiếp tục >>")
         cookies = driver.get_cookies()
         _url = base_url_with_path(driver.current_url)
-        if _url == "www.facebook.com" or _url == "www.facebook.com/login" or _url.startswith("www.facebook.com/checkpoint/"):
-            raise Exception(f"Đăng nhập thất bại [{_url}]")
+        if _url == "www.facebook.com" or _url == "www.facebook.com/login":
+            print(f"Đăng nhập thất bại [{_url}]")
+            return 0, None
+        if _url.startswith("www.facebook.com/checkpoint/"):
+            print(f"Đăng nhập thất bại [{_url}]")
+            return -1, None
         print(f"{hide_email(username)}: Đăng nhập thành công [{driver.current_url}]")
     except Exception as e:
         print(f"Error: {e}")
-        return None
+        return 0, None
     finally:
         driver.quit()
         
-    return cookies
+    return 1, cookies

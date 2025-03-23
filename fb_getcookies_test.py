@@ -119,11 +119,14 @@ except Exception as e:
     print(e)
 
 print("Kiểm tra cookies")
-cookies, old_cookies = check_cookies(filename)
+ret_cookies, cookies = check_cookies(filename)
 print("Kiểm tra cookies dự phòng")
-bakcookies, old_bakcookies = check_cookies(bakfilename)
+ret_bakcookies, bakcookies = check_cookies(bakfilename)
 
-if cookies == None:
+if ret_cookies == -1:
+    raise Exception("Tài khoản đã bị khóa")
+
+if ret_cookies == 0:
     print("Cookies đã hết hạn sử dụng, sử dụng cookies dự phòng")
     cookies = bakcookies
     bakcookies = None
@@ -132,7 +135,9 @@ if username:
     for i in range(5):
         if cookies == None:
             print("Đang lấy cookies mới...")
-            cookies = get_fb_cookies(username, password, otp_secret, alt_account, incognito = True)
+            ret_cookies, cookies = get_fb_cookies(username, password, otp_secret, alt_account, incognito = True)
+        if ret_cookies == -1:
+            raise Exception("Tài khoản đã bị khóa")
         if cookies == None:
             time.sleep(5)
             continue
@@ -142,7 +147,9 @@ if username:
     for i in range(5):
         if bakcookies == None:
             print("Đang lấy cookies dự phòng mới...")
-            bakcookies = get_fb_cookies(username, password, otp_secret, alt_account, incognito = True)
+            ret_bakcookies, bakcookies = get_fb_cookies(username, password, otp_secret, alt_account, incognito = True)
+        if ret_bakcookies == -1:
+            raise Exception("Tài khoản đã bị khóa")
         if bakcookies == None:
             time.sleep(5)
             continue

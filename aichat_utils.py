@@ -272,7 +272,7 @@ class JSON5DecodeError(ValueError):
 def fix_json(gemini_output):
     try:
         return json.loads(gemini_output)  # Try strict parsing
-    except json5.JSONDecodeError:
+    except json.JSONDecodeError:
         try:
             return json5.loads(gemini_output)  # Fallback to lenient parsing
         except ValueError as e:

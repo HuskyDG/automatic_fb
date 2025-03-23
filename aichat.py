@@ -797,8 +797,11 @@ try:
                                 try:
                                     file_element = msg_element.find_element(By.CSS_SELECTOR, 'a[download]')
                                     file_url = file_element.get_attribute("href")
-                                    parsed_url = urlparse(file_url)
-                                    file_down_name = parsed_url.path.rstrip("/").split("/")[-1]
+                                    if file_url.startswith("blob:"): # e2ee chats save files in blob
+                                        file_down_name = file_element.get_attribute("download")
+                                    else:
+                                        parsed_url = urlparse(file_url)
+                                        file_down_name = parsed_url.path.rstrip("/").split("/")[-1]
                                     file_ext, mime_type = get_mine_type(file_down_name)
                                     if check_supported_file(mime_type):
                                         file_data = get_file_data(driver, file_url)
@@ -807,6 +810,7 @@ try:
                                         file_file = BytesIO(file_data)
                                         bytesio_to_file(file_file, file_name)
                                         chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send file", "file_name" : file_name, "mime_type" : mime_type, "url" : None, "loaded" : False }, "mentioned_message" : quotes_text})
+                                    continue
                                 except Exception:
                                     pass
 

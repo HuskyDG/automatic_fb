@@ -270,7 +270,7 @@ try:
     def backup_chat_memories():
         global chat_histories_prev_hash
         if chat_histories_prev_hash == hash_dict(chat_histories):
-            return
+            return False
         chat_histories_prev_hash = hash_dict(chat_histories)
         upload_file(GITHUB_TOKEN, GITHUB_REPO, f_facebook_infos, STORAGE_BRANCE)
         if os.path.exists("files"):
@@ -289,6 +289,7 @@ try:
         # Backup chat_histories
         pickle_to_file(f_chat_history + ".enc", chat_histories, encrypt_key)
         upload_file(GITHUB_TOKEN, GITHUB_REPO, f_chat_history + ".enc", STORAGE_BRANCE)
+        return True
 
     while True:
         try:
@@ -378,12 +379,10 @@ try:
 
             if "aichat" in work_jobs:
                 driver.switch_to.window(next_chat_tab)
-                if (int(time.time()) - last_reload_ts_mapping.get(next_chat_tab, 0)) > 60*5:
-                    print_with_time("Tải lại trang messenger...")
+                if last_reload_ts_mapping.get(next_chat_tab, 0) == 0:
+                    print_with_time(f"Khởi động Messenger: {next_chat_url}")
                     driver.get(f"https://{next_chat_url}")
                     last_reload_ts_mapping[next_chat_tab] = int(time.time())
-                    if next_chat_tab == chat_tab:
-                        backup_chat_memories()
                 try:
                     if len(onetimecode) >= 6:
                         otc_input = driver.find_element(By.CSS_SELECTOR, 'input[autocomplete="one-time-code"]')
@@ -431,6 +430,7 @@ try:
                 if len(chat_list) <= 0:
                     continue
                 print_with_time(f"Nhận được {len(chat_list)} tin nhắn mới")
+                new_msg_button = driver.find_elements(By.CSS_SELECTOR, 'a[href="/messages/new/"]')
 
                 for chat_info in chat_list:
                     if True:
@@ -1108,6 +1108,8 @@ try:
                                     pass
                                 print_with_time("Thử lại:", _x + 1)
                                 time.sleep(2)
+                            if len(new_msg_button) == 0:
+                                driver.back()
                             break
                         except StaleElementReferenceException:
                             pass
@@ -1118,8 +1120,11 @@ try:
                 new_msg_button = driver.find_elements(By.CSS_SELECTOR, 'a[href="/messages/new/"]')
                 if len(new_msg_button) > 0:
                     driver.execute_script("arguments[0].click();", new_msg_button[0])
-                else:
-                    driver.back()
+                if (int(time.time()) - last_reload_ts_mapping.get(next_chat_tab, 0)) > 60*5:
+                    if backup_chat_memories():
+                        print_with_time("Tải lại trang messenger...")
+                        driver.get(f"https://{next_chat_url}")
+                    last_reload_ts_mapping[next_chat_tab] = int(time.time())
         except Exception as e:
             print_with_time(e)
         finally:

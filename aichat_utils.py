@@ -327,15 +327,13 @@ def get_random_image_link(keyword, get=10, adult="on"):
 
 def check_supported_file(mime_type):
     # List of supported MIME types for Google Vertex AI
+    # https://firebase.google.com/docs/vertex-ai/input-file-requirements
     supported_mime_types = [
-        "text/plain", "text/html", "application/json",  # Text files
+        "text/plain", # Text files
         "image/jpeg", "image/png", "image/gif", "image/webp",  # Image files
         "audio/mpeg", "audio/wav", "audio/ogg", "audio/mp4",  # Audio files
         "video/mp4", "video/webm",  # Video files
         "application/pdf",  # PDF files
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",  # Word (DOCX)
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",  # Excel (XLSX)
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation"  # PowerPoint (PPTX)
     ]
     
     # Check if the MIME type is in the supported list
@@ -345,7 +343,7 @@ def get_mine_type(filename):
     # Extract the file extension
     ext = os.path.splitext(filename)[1]
     # Map .ipynb to application/json
-    mimetypes.add_type('application/json', '.ipynb')
+    mimetypes.add_type('text/plain', '.ipynb')
     # Guess the MIME type of the file based on its extension
     mime_type, _ = mimetypes.guess_type(filename)
     # Return the extension and MIME type

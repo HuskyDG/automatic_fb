@@ -103,6 +103,14 @@ jobs:
           PYTHONUNBUFFERED: "1"
           PASSWORD: ${{ secrets.PASSWORD }} # Decrypt key
 
+      - name: Cache scoped_dir
+        if: ${{ github.event_name == 'schedule' || inputs.check_only != true }}
+        id: cache-scoped-dir
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.SCPDIR }}
+          key: scoped-dir-${{ runner.os }}-${{ hashFiles('logininfo.json') }}
+
       # Run AI Chat on Messenger account (schedule)
       - name: Run AI Chat on Messenger account
         if: ${{ github.event_name == 'schedule' || inputs.check_only != true }}

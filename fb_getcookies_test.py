@@ -123,8 +123,9 @@ ret_cookies, cookies = check_cookies(filename)
 print("Kiểm tra cookies dự phòng")
 ret_bakcookies, bakcookies = check_cookies(bakfilename)
 
-if ret_cookies == -1:
-    raise Exception("Tài khoản đã bị khóa")
+if ret_cookies == -1 or ret_bakcookies == -1:
+    print("Tài khoản đã bị khóa")
+    raise Exception("Facebook Login Exception")
 
 if ret_cookies == 0:
     print("Cookies đã hết hạn sử dụng, sử dụng cookies dự phòng")
@@ -137,19 +138,22 @@ if username:
             print("Đang lấy cookies mới...")
             ret_cookies, cookies = get_fb_cookies(username, password, otp_secret, alt_account, incognito = True)
         if ret_cookies == -1:
-            raise Exception("Tài khoản đã bị khóa")
+            print("Tài khoản đã bị khóa")
+            raise Exception("Facebook Login Exception")
         if cookies == None:
             time.sleep(5)
             continue
         break
     if cookies == None:
-        raise Exception("Đăng nhập thất bại")
+        print("Đăng nhập thất bại")
+        raise Exception("Facebook Login Exception")
     for i in range(5):
         if bakcookies == None:
             print("Đang lấy cookies dự phòng mới...")
             ret_bakcookies, bakcookies = get_fb_cookies(username, password, otp_secret, alt_account, incognito = True)
         if ret_bakcookies == -1:
-            raise Exception("Tài khoản đã bị khóa")
+            print("Tài khoản đã bị khóa")
+            raise Exception("Facebook Login Exception")
         if bakcookies == None:
             time.sleep(5)
             continue

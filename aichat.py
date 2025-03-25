@@ -322,7 +322,7 @@ try:
             time.sleep(0.5)
             if "friends" in work_jobs:
                 driver.switch_to.window(friend_tab)
-                if base_url_with_path(driver.current_url) != "www.facebook.com/friends" or (int(time.time()) - last_reload_ts_mapping.get(friend_tab, 0)) > 60*5:
+                if base_url_with_path(driver.current_url) != "www.facebook.com/friends" or (int(time.time()) - last_reload_ts_mapping.get(friend_tab, 0)) > 60*30:
                     last_reload_ts_mapping[friend_tab] = int(time.time())
                     driver.get("https://www.facebook.com/friends")
                     try:

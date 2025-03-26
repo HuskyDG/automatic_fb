@@ -623,9 +623,6 @@ try:
                                 chat_history = old_chat_history
                                 chat_histories[message_id] = chat_history
 
-                            chat_history_new = []
-                            files_mapping = {}
-
                             header_prompt = get_header_prompt(get_day_and_time(), who_chatted, facebook_info)
 
                             prompt_list.append(f'The Messenger conversation with "{who_chatted}" is as json here:')
@@ -679,174 +676,189 @@ try:
                             """)
                             # call driver.execute_script("return window.last_play_src;")
 
-                            for msg_element in reversed(msg_table.find_elements(By.CSS_SELECTOR, 'div[role="row"]')):
-                                try:
-                                    timedate = msg_element.find_element(By.CSS_SELECTOR, 'span[class="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x676frb x1pg5gke xvq8zen xo1l8bm x12scifz"]')
-                                    chat_history_new.insert(0, {"message_type" : "conversation_event", "info" : timedate.text})
-                                except Exception:
-                                    pass
-
-                                try:
-                                    quotes_text = msg_element.find_element(By.CSS_SELECTOR, 'div[class="xi81zsa x126k92a"]').text
-                                except Exception:
-                                    quotes_text = None
-
-                                # Finding name
-                                try: 
-                                    msg_element.find_element(By.CSS_SELECTOR, 'div[class="html-div xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp x11i5rnm x12nagc x1mh8g0r x1yc453h x126k92a xyk4ms5"]').text
-                                    break
-                                except Exception:
-                                    name = None
-                                    mark = "text_message"
-
-                                if name == None:
-                                    try: 
-                                        name = msg_element.find_element(By.CSS_SELECTOR, 'img[class="x1rg5ohu x5yr21d xl1xv1r xh8yej3"]').get_attribute("alt")
-                                        name =  f"{who_chatted} ({name})"
-                                    except Exception:
-                                        name = None
-
-                                if name == None:
-                                    try: 
-                                        name = msg_element.find_element(By.CSS_SELECTOR, 'h4').text
-                                        name =  f"{who_chatted} ({name})"
-                                    except Exception:
-                                        name = None
-                                if name == None:
-                                    try: 
-                                        name = msg_element.find_element(By.CSS_SELECTOR, 'span[class="html-span xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1hl2dhg x16tdsg8 x1vvkbs xzpqnlu x1hyvwdk xjm9jq1 x6ikm8r x10wlt62 x10l6tqk x1i1rx1s"]').text
-                                        name =  f"{who_chatted} ({name})"
-                                    except Exception:
-                                        name = None
-                                
-                                msg = None
-                                try:
-                                    msg_frame = msg_element.find_element(By.CSS_SELECTOR, 'div[dir="auto"][class^="html-div "]')
-                                    msg = msg_frame.text
-                                    mentioned_to_me = msg_frame.find_elements(By.CSS_SELECTOR, f'a[href="https://www.facebook.com/{self_fbid}/"]')
-                                    if len(mentioned_to_me) > 0:
-                                        chat_histories["status"][message_id] = True
-                                        chat_histories["status"][facebook_id] = True
-                                        should_not_chat = False
-                                        chat_history.insert(0, {"message_type" : "new_chat", "info" : "You are mentioned in chat"})
-                                except Exception:
-                                    pass
-                                if msg is None:
+                            def process_elements(msg_table):
+                                chat_history_new = []
+                                files_mapping = {}
+                                for msg_element in reversed(msg_table.find_elements(By.CSS_SELECTOR, 'div[role="row"]')):
                                     try:
-                                        msg_title = msg_element.find_element(By.CSS_SELECTOR, 'span.x1lliihq.x6ikm8r.x10wlt62.x1n2onr6')
-                                        msg = msg_title.text
-                                        msg_small = msg_element.find_element(By.CSS_SELECTOR, 'span.x1lliihq.x6ikm8r.x10wlt62.x1n2onr6.x1j85h84')
-                                        msg += "\n" + msg_small.text
+                                        checkpointed = msg_element.get_attribute("checkpoint")
+                                    except Exception:
+                                        checkpointed = "none"
+                                    finally:
+                                        if checkpointed == "checkpointed":
+                                            break
+                                        driver.execute_script("arguments[0].setAttribute('checkpoint', 'checkpointed')", msg_element)
+
+                                    try:
+                                        timedate = msg_element.find_element(By.CSS_SELECTOR, 'span[class="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x676frb x1pg5gke xvq8zen xo1l8bm x12scifz"]')
+                                        chat_history_new.insert(0, {"message_type" : "conversation_event", "info" : timedate.text})
                                     except Exception:
                                         pass
-                                
-                                try:
-                                    image_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[class="xz74otr xmz0i5r x193iq5w"]')
-                                    for image_element in image_elements:
+
+                                    try:
+                                        quotes_text = msg_element.find_element(By.CSS_SELECTOR, 'div[class="xi81zsa x126k92a"]').text
+                                    except Exception:
+                                        quotes_text = None
+
+                                    # Finding name
+                                    try: 
+                                        msg_element.find_element(By.CSS_SELECTOR, 'div[class="html-div xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp x11i5rnm x12nagc x1mh8g0r x1yc453h x126k92a xyk4ms5"]').text
+                                        break
+                                    except Exception:
+                                        name = None
+                                        mark = "text_message"
+
+                                    if name == None:
+                                        try: 
+                                            name = msg_element.find_element(By.CSS_SELECTOR, 'img[class="x1rg5ohu x5yr21d xl1xv1r xh8yej3"]').get_attribute("alt")
+                                            name =  f"{who_chatted} ({name})"
+                                        except Exception:
+                                            name = None
+
+                                    if name == None:
+                                        try: 
+                                            name = msg_element.find_element(By.CSS_SELECTOR, 'h4').text
+                                            name =  f"{who_chatted} ({name})"
+                                        except Exception:
+                                            name = None
+                                    if name == None:
+                                        try: 
+                                            name = msg_element.find_element(By.CSS_SELECTOR, 'span[class="html-span xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1hl2dhg x16tdsg8 x1vvkbs xzpqnlu x1hyvwdk xjm9jq1 x6ikm8r x10wlt62 x10l6tqk x1i1rx1s"]').text
+                                            name =  f"{who_chatted} ({name})"
+                                        except Exception:
+                                            name = None
+                                    
+                                    msg = None
+                                    try:
+                                        msg_frame = msg_element.find_element(By.CSS_SELECTOR, 'div[dir="auto"][class^="html-div "]')
+                                        msg = msg_frame.text
+                                        mentioned_to_me = msg_frame.find_elements(By.CSS_SELECTOR, f'a[href="https://www.facebook.com/{self_fbid}/"]')
+                                        if len(mentioned_to_me) > 0:
+                                            chat_histories["status"][message_id] = True
+                                            chat_histories["status"][facebook_id] = True
+                                            should_not_chat = False
+                                            chat_history.insert(0, {"message_type" : "new_chat", "info" : "You are mentioned in chat"})
+                                    except Exception:
+                                        pass
+                                    if msg is None:
                                         try:
-                                            data_uri = image_element.get_attribute("src")
-                                            _url = None
-                                            if data_uri.startswith("data:image/jpeg;base64,"):
-                                                # Extract the base64 string (remove the prefix)
-                                                base64_str = data_uri.split(",")[1]
-                                                # Decode the base64 string into binary data
-                                                image_data = base64.b64decode(base64_str)
-                                            else:
-                                                image_data = requests.get(data_uri).content
-                                                _url = data_uri
-                                            image_name = f"files/{generate_random_string(40)}"
-                                            os.makedirs(os.path.dirname(image_name), exist_ok=True)
-                                            # Use BytesIO to create a file-like object for the image
-                                            files_mapping[image_name] = image_data
-                                           
-                                            chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send image", "file_name" : image_name, "mime_type" : "image/jpeg" , "url" : _url, "loaded" : True }, "mentioned_message" : quotes_text})
+                                            msg_title = msg_element.find_element(By.CSS_SELECTOR, 'span.x1lliihq.x6ikm8r.x10wlt62.x1n2onr6')
+                                            msg = msg_title.text
+                                            msg_small = msg_element.find_element(By.CSS_SELECTOR, 'span.x1lliihq.x6ikm8r.x10wlt62.x1n2onr6.x1j85h84')
+                                            msg += "\n" + msg_small.text
                                         except Exception:
                                             pass
-                                except Exception:
-                                    pass
-
-                                try:
-                                    video_element = msg_element.find_element(By.CSS_SELECTOR, 'video')
-                                    video_url = video_element.get_attribute("src")
-                                    video_data = get_file_data(driver, video_url)
-                                    video_name = f"files/{generate_random_string(40)}"
-                                    os.makedirs(os.path.dirname(video_name), exist_ok=True)
-                                    files_mapping[video_name] = video_data
-
-                                    chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send video", "file_name" : video_name, "mime_type" : "video/mp4", "url" : None, "loaded" : False }, "mentioned_message" : quotes_text})
-                                except Exception:
-                                    pass
-
-                                try:
-                                    audio_element = msg_element.find_element(By.CSS_SELECTOR, 'path[d="M10 25.5v-15a1.5 1.5 0 012.17-1.34l15 7.5a1.5 1.5 0 010 2.68l-15 7.5A1.5 1.5 0 0110 25.5z"]')
-                                    driver.execute_script('arguments[0].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));', audio_element)
-                                    time.sleep(0.2)
-                                    audio_url = driver.execute_script("return window.last_play_src;")
-                                    driver.execute_script("window.last_play_src = null;")
-                                    audio_data = get_file_data(driver, audio_url)
-                                    audio_name = f"files/{generate_random_string(40)}"
-                                    os.makedirs(os.path.dirname(audio_name), exist_ok=True)
-                                    files_mapping[audio_name] = audio_data
-
-                                    chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send audio", "file_name" : audio_name, "mime_type" : "audio/mp4", "url" : None, "loaded" : True }, "mentioned_message" : quotes_text})
-                                except Exception:
-                                    pass
-
-                                try:
-                                    file_element = msg_element.find_element(By.CSS_SELECTOR, 'a[download]')
-                                    file_url = file_element.get_attribute("href")
-                                    if file_url.startswith("blob:"): # e2ee chats save files in blob
-                                        file_down_name = file_element.get_attribute("download")
-                                    else:
-                                        parsed_url = urlparse(file_url)
-                                        file_down_name = parsed_url.path.rstrip("/").split("/")[-1]
-                                    file_ext, mime_type = get_mine_type(file_down_name)
-                                    if check_supported_file(mime_type):
-                                        file_data = get_file_data(driver, file_url)
-                                        file_name = f"files/{generate_random_string(40)}"
-                                        os.makedirs(os.path.dirname(file_name), exist_ok=True)
-                                        files_mapping[file_name] = file_data
-                                        chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send file", "file_name" : file_name, "mime_type" : mime_type, "url" : None, "loaded" : False }, "mentioned_message" : quotes_text})
-                                    continue
-                                except Exception:
-                                    pass
-
-                                try: 
-                                    react_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[height="32"][width="32"]')
-                                    emojis = ""
-                                    if msg == None and len(react_elements) > 0:
-                                        for react_element in react_elements:
-                                            emojis += react_element.get_attribute("alt")
-                                        msg = emojis
-                                except Exception:
-                                    pass
-
-                                if msg == None:
+                                    
                                     try:
-                                        msg_element.find_element(By.CSS_SELECTOR, 'div[aria-label="Like, thumbs up"]')
-                                        msg = "👍"
+                                        image_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[class="xz74otr xmz0i5r x193iq5w"]')
+                                        for image_element in image_elements:
+                                            try:
+                                                data_uri = image_element.get_attribute("src")
+                                                _url = None
+                                                if data_uri.startswith("data:image/jpeg;base64,"):
+                                                    # Extract the base64 string (remove the prefix)
+                                                    base64_str = data_uri.split(",")[1]
+                                                    # Decode the base64 string into binary data
+                                                    image_data = base64.b64decode(base64_str)
+                                                else:
+                                                    image_data = requests.get(data_uri).content
+                                                    _url = data_uri
+                                                image_name = f"files/{generate_random_string(40)}"
+                                                os.makedirs(os.path.dirname(image_name), exist_ok=True)
+                                                # Use BytesIO to create a file-like object for the image
+                                                files_mapping[image_name] = image_data
+                                               
+                                                chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send image", "file_name" : image_name, "mime_type" : "image/jpeg" , "url" : _url, "loaded" : True }, "mentioned_message" : quotes_text})
+                                            except Exception:
+                                                pass
                                     except Exception:
-                                        msg = None
+                                        pass
 
-                                if msg == None:
-                                    continue
-                                if name == None:
-                                    name = "None"
-                                
-                                chat_history_new.insert(0, {"message_type" : mark, "info" : {"name" : name, "msg" : msg}, "mentioned_message" : quotes_text })
+                                    try:
+                                        video_element = msg_element.find_element(By.CSS_SELECTOR, 'video')
+                                        video_url = video_element.get_attribute("src")
+                                        video_data = get_file_data(driver, video_url)
+                                        video_name = f"files/{generate_random_string(40)}"
+                                        os.makedirs(os.path.dirname(video_name), exist_ok=True)
+                                        files_mapping[video_name] = video_data
 
-                                try: 
-                                    react_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[height="16"][width="16"]')
-                                    emojis = ""
-                                    if len(react_elements) > 0:
-                                        for react_element in react_elements:
-                                            emojis += react_element.get_attribute("alt")
-                                        emoji_info = f"The above message was reacted with following emojis: {emojis}"
-                                        
-                                        chat_history_new.insert(0, {"message_type" : "reactions", "info" : emoji_info})
-                                        
-                                except Exception:
-                                    pass
+                                        chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send video", "file_name" : video_name, "mime_type" : "video/mp4", "url" : None, "loaded" : False }, "mentioned_message" : quotes_text})
+                                    except Exception:
+                                        pass
+
+                                    try:
+                                        audio_element = msg_element.find_element(By.CSS_SELECTOR, 'path[d="M10 25.5v-15a1.5 1.5 0 012.17-1.34l15 7.5a1.5 1.5 0 010 2.68l-15 7.5A1.5 1.5 0 0110 25.5z"]')
+                                        driver.execute_script('arguments[0].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));', audio_element)
+                                        time.sleep(0.2)
+                                        audio_url = driver.execute_script("return window.last_play_src;")
+                                        driver.execute_script("window.last_play_src = null;")
+                                        audio_data = get_file_data(driver, audio_url)
+                                        audio_name = f"files/{generate_random_string(40)}"
+                                        os.makedirs(os.path.dirname(audio_name), exist_ok=True)
+                                        files_mapping[audio_name] = audio_data
+
+                                        chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send audio", "file_name" : audio_name, "mime_type" : "audio/mp4", "url" : None, "loaded" : True }, "mentioned_message" : quotes_text})
+                                    except Exception:
+                                        pass
+
+                                    try:
+                                        file_element = msg_element.find_element(By.CSS_SELECTOR, 'a[download]')
+                                        file_url = file_element.get_attribute("href")
+                                        if file_url.startswith("blob:"): # e2ee chats save files in blob
+                                            file_down_name = file_element.get_attribute("download")
+                                        else:
+                                            parsed_url = urlparse(file_url)
+                                            file_down_name = parsed_url.path.rstrip("/").split("/")[-1]
+                                        file_ext, mime_type = get_mine_type(file_down_name)
+                                        if check_supported_file(mime_type):
+                                            file_data = get_file_data(driver, file_url)
+                                            file_name = f"files/{generate_random_string(40)}"
+                                            os.makedirs(os.path.dirname(file_name), exist_ok=True)
+                                            files_mapping[file_name] = file_data
+                                            chat_history_new.insert(0, {"message_type" : "file", "info" : {"name" : name, "msg" : "send file", "file_name" : file_name, "mime_type" : mime_type, "url" : None, "loaded" : False }, "mentioned_message" : quotes_text})
+                                        continue
+                                    except Exception:
+                                        pass
+
+                                    try: 
+                                        react_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[height="32"][width="32"]')
+                                        emojis = ""
+                                        if msg == None and len(react_elements) > 0:
+                                            for react_element in react_elements:
+                                                emojis += react_element.get_attribute("alt")
+                                            msg = emojis
+                                    except Exception:
+                                        pass
+
+                                    if msg == None:
+                                        try:
+                                            msg_element.find_element(By.CSS_SELECTOR, 'div[aria-label="Like, thumbs up"]')
+                                            msg = "👍"
+                                        except Exception:
+                                            msg = None
+
+                                    if msg == None:
+                                        continue
+                                    if name == None:
+                                        name = "None"
+                                    
+                                    chat_history_new.insert(0, {"message_type" : mark, "info" : {"name" : name, "msg" : msg}, "mentioned_message" : quotes_text })
+
+                                    try: 
+                                        react_elements = msg_element.find_elements(By.CSS_SELECTOR, 'img[height="16"][width="16"]')
+                                        emojis = ""
+                                        if len(react_elements) > 0:
+                                            for react_element in react_elements:
+                                                emojis += react_element.get_attribute("alt")
+                                            emoji_info = f"The above message was reacted with following emojis: {emojis}"
+                                            
+                                            chat_history_new.insert(0, {"message_type" : "reactions", "info" : emoji_info})
+                                            
+                                    except Exception:
+                                        pass
+                                return chat_history_new, files_mapping
+
+                            chat_history_new, files_mapping = process_elements(msg_table)
 
                             print_with_time("Đã đọc xong!")
 
@@ -1092,11 +1104,16 @@ try:
                                         time.sleep(0.5)
                                         print_with_time("AI Trả lời:", reply_msg)
                                         send_keys_long_text(get_message_input(), remove_non_bmp_characters(replace_emoji_with_shortcut(reply_msg)))
+                                        # There maybe newer msg while AI process chat
+                                        chat_history_new, files_mapping = process_elements(msg_table)
+                                        # Press Enter to send message
                                         get_message_input().send_keys("\n")
-
-                                    chat_history.append({"message_type" : "your_text_message", "info" : {"name" : myname, "msg" : reply_msg}, "mentioned_message" : None })
-                                    chat_histories[message_id] = chat_history
-                                    time.sleep(2)
+                                        chat_history.extend(chat_history_new)
+                                        chat_history.append({"message_type" : "your_text_message", "info" : {"name" : myname, "msg" : reply_msg}, "mentioned_message" : None })
+                                        chat_histories[message_id] = chat_history
+                                        for file_name, file_data in files_mapping.items():
+                                            file_object = BytesIO(file_data)
+                                            bytesio_to_file(file_object, file_name)
                                     break
                                 except NoSuchElementException:
                                     print_with_time("Không thể trả lời")

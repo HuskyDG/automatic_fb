@@ -221,32 +221,31 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, cooki
                     ])
                 print(f"{hide_email(username)}: Nhấn thay đổi phương thức xác thực")
                 actions.move_to_element(other_veri_btn).click().perform() # Click other verification method
-                time.sleep(random.randint(5,8))
+                #time.sleep(random.randint(1,3))
                 other_veri_btn = find_element_when_clickable_in_list([
                     (By.XPATH, '//div[contains(text(), "Ứng dụng xác thực")]'),
                     (By.XPATH, '//div[contains(text(), "Authentication app")]')
                     ])
                 print(f"{hide_email(username)}: Chọn xác thực bằng mã OTP từ ứng dụng xác thực")
                 actions.move_to_element(other_veri_btn).click().perform() # Click App Auth method
-                time.sleep(random.randint(5,8))
+                #time.sleep(random.randint(1,3))
                 other_veri_btn = find_element_when_clickable_in_list([
                     (By.XPATH, '//span[contains(text(), "Tiếp tục")]'),
                     (By.XPATH, '//span[contains(text(), "Continue")]')
                     ])
                 print(f"{hide_email(username)}: Nhấn vào nút Tiếp tục")
                 actions.move_to_element(other_veri_btn).click().perform() # Click Continue
-                time.sleep(random.randint(5,8))
+                #time.sleep(random.randint(1,3))
                 other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'input[type="text"]')
-                actions.move_to_element(other_veri_btn).click().perform() # Click on input code
-                time.sleep(random.randint(5,8))
-                print(f"{hide_email(username)}: Đã nhập mã OTP")
-                actions.move_to_element(other_veri_btn).send_keys(generate_otp(otp_secret)).perform()
-                other_veri_btn = find_element_when_clickable_in_list([
+                continue_btn = find_element_when_clickable_in_list([
                     (By.XPATH, '//span[contains(text(), "Tiếp tục")]'),
                     (By.XPATH, '//span[contains(text(), "Continue")]')
                     ])
+                actions.move_to_element(other_veri_btn).click().perform() # Click on input code
+                print(f"{hide_email(username)}: Đã nhập mã OTP")
+                actions.move_to_element(other_veri_btn).send_keys(generate_otp(otp_secret) + "\n").perform()
                 print(f"{hide_email(username)}: Nhấn xác nhận")
-                actions.move_to_element(other_veri_btn).click().perform() # Click Confirmed
+                actions.move_to_element(continue_btn).click().perform() # Click Confirmed
             except Exception as e:
                 print(f"Error: {e}")
 

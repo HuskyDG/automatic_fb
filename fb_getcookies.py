@@ -253,7 +253,18 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, cooki
         wait.until(
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
-        time.sleep(5)
+
+        if  (_url == "www.facebook.com/two_step_verification/two_factor" or 
+            _url == "www.facebook.com/auth_platform/afad"):
+            print(f"{hide_email(username)}: Đang chờ Facebook xác thực. Có thể phê duyệt từ thiết bị khác trong vòng 60 giây...")
+            for i in range(60):
+                _url = base_url_with_path(driver.current_url)
+                if  (_url == "www.facebook.com/two_step_verification/two_factor" or 
+                    _url == "www.facebook.com/auth_platform/afad"):
+                    time.sleep(1)
+                else:
+                    break
+
         _url = base_url_with_path(driver.current_url)
         print(_url)
         if _url == "www.facebook.com/two_factor/remember_browser":

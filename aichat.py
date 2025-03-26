@@ -679,6 +679,7 @@ try:
                             def process_elements(msg_table):
                                 chat_history_new = []
                                 files_mapping = {}
+                                global should_not_chat
                                 for msg_element in reversed(msg_table.find_elements(By.CSS_SELECTOR, 'div[role="row"]')):
                                     try:
                                         checkpointed = msg_element.get_attribute("checkpoint")

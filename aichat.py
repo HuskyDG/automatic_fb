@@ -450,6 +450,7 @@ try:
 
                         driver.execute_script("arguments[0].click();", chat_btn)
                         time.sleep(1)
+                        message_id = get_last_part(chat_href)
                         if not chat_histories.get(message_id, None):
                             chat_histories[message_id] = [{"message_type" : "new_chat", "info" : "You are now connected on Messenger"}]
                         

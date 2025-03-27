@@ -473,8 +473,8 @@ try:
                                 if facebook_info != None:
                                     last_access_ts = facebook_info.get("Last access", 0)
                                     
-                                    # Get the current time Unix timestamp minus 3 days (3 days = 3 * 24 * 60 * 60 seconds)
-                                    three_days_ago = int(time.time()) - 3 * 24 * 60 * 60
+                                    # Get the current time Unix timestamp minus 30 days
+                                    three_days_ago = int(time.time()) - 30 * 24 * 60 * 60
                                     
                                     if last_access_ts < three_days_ago:
                                         facebook_info = None

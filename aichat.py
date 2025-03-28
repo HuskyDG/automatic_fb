@@ -192,6 +192,8 @@ try:
             "?sk=about_details"
         ]
     self_fbid = get_facebook_id(driver.current_url)
+    if self_fbid is None:
+        self_fbid = get_facebook_id(driver.current_url, cache_fb)
     print_with_time(f"ID là {self_fbid}")
     if self_facebook_info.get("Last access", 0) == 0:
         self_facebook_info["Last access"] = int(time.time())

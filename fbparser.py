@@ -9,9 +9,10 @@ def is_facebook_profile_url(url):
     # Check if the URL matches the pattern
     return re.match(pattern, url) is not None
 
-def get_facebook_id(fburl):
+def get_facebook_id(fburl, selenium_cookies = None):
     session = requests.Session()
-    source = session.get(fburl)
+    cookies = {cookie["name"]: cookie["value"] for cookie in selenium_cookies} if selenium_cookies else None
+    source = session.get(fburl, cookies=cookies)
     soup = BeautifulSoup(source.text, 'html.parser')
     myid = soup.find('meta', {'property': 'al:android:url'})
     if myid != None:

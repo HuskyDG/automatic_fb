@@ -1,7 +1,7 @@
 
 # **Tài liệu hướng dẫn Workflow: Chạy AI Chat trên tài khoản Messenger**
 
-Hỗ trợ giao diện Facebook hiện tại: [Xem giao diện](/docs/static_page/static_page_www_facebook_com_messages_e2ee_t_9719859434713013.html)
+Hỗ trợ giao diện Facebook hiện tại: [Xem giao diện](https://huskydg.github.io/automatic_fb/static_page/static_page_www_facebook_com_messages_e2ee_t_29050446974570740.html)
 
 ## **Tên Workflow**  
 `Run AI Chat on Messenger Account`

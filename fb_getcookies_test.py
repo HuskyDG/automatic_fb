@@ -23,6 +23,7 @@ f_rules_txt = "setup/rules.txt"
 cookies_text = None
 alt_cookies_text = None
 use_backup = True
+ai_prompt = None
 
 if os.getenv("USE_ENV_SETUP") == "true":
 
@@ -41,6 +42,8 @@ if os.getenv("USE_ENV_SETUP") == "true":
     login_info["cookies_text"] = None
     alt_cookies_text = login_info.get("alt_cookies_text", None)
     login_info["alt_cookies_text"] = None
+    ai_prompt = login_info.get("ai_prompt", None)
+    login_info["ai_prompt"] = None
 
     if login_info.get("username", None):
         with open(f_login_info, "w") as f:
@@ -62,8 +65,6 @@ if use_backup:
     with open(f_login_info, "r", encoding='utf-8') as f:
         login_info = json.load(f)
 
-ai_prompt = login_info.get("ai_prompt", None)
-login_info["ai_prompt"] = None
 if ai_prompt is not None and ai_prompt != "":
     with open(f_intro_txt, "w", encoding='utf-8') as f: # What kind of person will AI simulate?
         f.write(ai_prompt)

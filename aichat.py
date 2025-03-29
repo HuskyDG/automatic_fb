@@ -1069,8 +1069,6 @@ try:
                                                             continue
                                                         print_with_time(f"AI gửi ảnh {img_keyword} từ: {image_link}")
                                                         drop_image(driver, button, image_io)
-                                                        image_name = f"files/{generate_random_string(40)}"
-                                                        chat_history.append({"message_type" : "file", "info" : {"name" : myname, "msg" : "send image", "keyword" : img_keyword, "file_name" : image_name, "mime_type" : "image/jpeg" , "url" : image_link, "loaded" : True }})
                                                         is_image_dropped = True
                                                         break
                                                 except:
@@ -1097,8 +1095,6 @@ try:
                                                         raise Exception("No music")
                                                     print_with_time(f"AI gửi nhạc {itunes_keyword} từ: {itunes_link}")
                                                     drop_file(driver, button, music_io, "audio/mp4")
-                                                    file_name = f"files/{generate_random_string(40)}"
-                                                    chat_history.append({"message_type" : "file", "info" : {"name" : myname, "msg" : "send audio", "keyword" : itunes_keyword, "file_name" : file_name, "mime_type" : "audio/mp4" , "url" : itunes_link, "loaded" : False }})
                                                     is_image_dropped = True
                                                     break
                                             except:

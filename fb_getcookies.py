@@ -215,27 +215,29 @@ def get_fb_cookies(username, password, otp_secret = None, alt_account = 0, cooki
             _url == "www.facebook.com/auth_platform/afad"):
             try:
                 print(f"{hide_email(username)}: Chưa phê duyệt đang nhập. Đang tiến hành Xác minh đăng nhập 2 bước tự động với OTP")
-                other_veri_btn = find_element_when_clickable_in_list([
-                    (By.XPATH, '//span[contains(text(), "Thử cách khác")]'),
-                    (By.XPATH, '//span[contains(text(), "Try another way")]')
-                    ])
-                print(f"{hide_email(username)}: Nhấn thay đổi phương thức xác thực")
-                actions.move_to_element(other_veri_btn).click().perform() # Click other verification method
-                #time.sleep(random.randint(1,3))
-                other_veri_btn = find_element_when_clickable_in_list([
-                    (By.XPATH, '//div[contains(text(), "Ứng dụng xác thực")]'),
-                    (By.XPATH, '//div[contains(text(), "Authentication app")]')
-                    ])
-                print(f"{hide_email(username)}: Chọn xác thực bằng mã OTP từ ứng dụng xác thực")
-                actions.move_to_element(other_veri_btn).click().perform() # Click App Auth method
-                #time.sleep(random.randint(1,3))
-                other_veri_btn = find_element_when_clickable_in_list([
-                    (By.XPATH, '//span[contains(text(), "Tiếp tục")]'),
-                    (By.XPATH, '//span[contains(text(), "Continue")]')
-                    ])
-                print(f"{hide_email(username)}: Nhấn vào nút Tiếp tục")
-                actions.move_to_element(other_veri_btn).click().perform() # Click Continue
-                #time.sleep(random.randint(1,3))
+                otp_input_type = driver.find_elements(By.CSS_SELECTOR, 'input[type="text"]')
+                if len(otp_input_type) == 0:
+                    other_veri_btn = find_element_when_clickable_in_list([
+                        (By.XPATH, '//span[contains(text(), "Thử cách khác")]'),
+                        (By.XPATH, '//span[contains(text(), "Try another way")]')
+                        ])
+                    print(f"{hide_email(username)}: Nhấn thay đổi phương thức xác thực")
+                    actions.move_to_element(other_veri_btn).click().perform() # Click other verification method
+                    #time.sleep(random.randint(1,3))
+                    other_veri_btn = find_element_when_clickable_in_list([
+                        (By.XPATH, '//div[contains(text(), "Ứng dụng xác thực")]'),
+                        (By.XPATH, '//div[contains(text(), "Authentication app")]')
+                        ])
+                    print(f"{hide_email(username)}: Chọn xác thực bằng mã OTP từ ứng dụng xác thực")
+                    actions.move_to_element(other_veri_btn).click().perform() # Click App Auth method
+                    #time.sleep(random.randint(1,3))
+                    other_veri_btn = find_element_when_clickable_in_list([
+                        (By.XPATH, '//span[contains(text(), "Tiếp tục")]'),
+                        (By.XPATH, '//span[contains(text(), "Continue")]')
+                        ])
+                    print(f"{hide_email(username)}: Nhấn vào nút Tiếp tục")
+                    actions.move_to_element(other_veri_btn).click().perform() # Click Continue
+                    #time.sleep(random.randint(1,3))
                 other_veri_btn = find_element_when_clickable(By.CSS_SELECTOR, 'input[type="text"]')
                 continue_btn = find_element_when_clickable_in_list([
                     (By.XPATH, '//span[contains(text(), "Tiếp tục")]'),
